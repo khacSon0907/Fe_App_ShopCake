@@ -7,7 +7,7 @@ import theme from './theme';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <CssVarsProvider theme={theme} defaultMode="light">
+    <CssVarsProvider theme={theme}>
       <CssBaseline />
       <App />
     </CssVarsProvider>

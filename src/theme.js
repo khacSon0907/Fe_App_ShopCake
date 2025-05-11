@@ -1,11 +1,17 @@
 import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
-import { teal, deepOrange, cyan, orange } from '@mui/material/colors';
+import { deepOrange, cyan, orange } from '@mui/material/colors';
 
 const theme = extendTheme({
+
+ 
   colorSchemes: {
     light: {
       palette: {
-        primary: teal,
+        primary:{
+          main: '#44612d',      // 🌟 màu chính
+          light: '#1A5EFF',
+          dark: '#072d6a',
+        },
         secondary: deepOrange,
         background: {
           default: '#f9f9f9',
@@ -22,6 +28,7 @@ const theme = extendTheme({
         },
       },
       shadows: [],
+        spacing: (factor) => `${0.25 * factor}rem`,
     },
     dark: {
       palette: {
@@ -41,12 +48,10 @@ const theme = extendTheme({
           color: '#ffffff',
         },
       },
-      shadows: [],
+      shadows: [],  spacing: (factor) => `${0.25 * factor}rem`,
     },
   },
-  typography: {
-    fontFamily: `'Poppins', sans-serif`,
-  },
+
   shape: {
     borderRadius: 12,
   },

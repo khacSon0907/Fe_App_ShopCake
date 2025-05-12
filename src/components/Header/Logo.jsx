@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Typography ,Chip} from "@mui/material";
 import logo from "../../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 export default function Logo() {
@@ -11,7 +11,15 @@ export default function Logo() {
       onClick={() => navigate("/")}
     >
       <img src={logo} alt="FE-Cake Logo" style={{ height: "80px" }} />
-      FE-Cake
+      
+      <Typography variant="h5"
+        sx={{
+                fontWeight: "bold", cursor: "pointer",color:"White",paddingLeft:5,paddingRight:10
+
+        }}
+      >
+        CÁI LÒ NƯỚNG
+      </Typography>
     </Typography>
   );
 }

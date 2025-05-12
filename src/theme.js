@@ -10,7 +10,7 @@ const theme = extendTheme({
         primary:{
           main: '#44612d',      // 🌟 màu chính
           light: '#1A5EFF',
-          dark: '#072d6a',
+          dark: '#e999a6',
         },
         secondary: deepOrange,
         background: {
@@ -32,7 +32,11 @@ const theme = extendTheme({
     },
     dark: {
       palette: {
-        primary: cyan,
+        primary:{
+         main: '#44612d',      // 🌟 màu chính
+          light: '#1A5EFF',
+          dark: '#152331',
+        },
         secondary: orange,
         background: {
           default: '#212121',

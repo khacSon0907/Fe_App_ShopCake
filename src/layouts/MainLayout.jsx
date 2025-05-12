@@ -5,7 +5,7 @@ import Footer from "../components/Footer/Footer";
 
 export default function MainLayout() {
   return (
-     <Box
+    <Box
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -14,13 +14,9 @@ export default function MainLayout() {
     >
       <Header />
 
-      <Toolbar /> {/* Tránh bị AppBar che */}
-      
-      {/* Nội dung chính co giãn */}
       <Box sx={{ flex: 1, px: 3, py: 2 }}>
         <Outlet />
       </Box>
-
       <Footer />
     </Box>
   );

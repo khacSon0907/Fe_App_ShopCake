@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-export default function Register() {
+export default function Login() {
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -29,18 +29,10 @@ export default function Register() {
     <Container maxWidth="sm">
       <Paper elevation={3} sx={{ padding: 4, mt: 8 }}>
         <Typography variant="h5" gutterBottom align="center">
-          Tạo tài khoản mới
+            Đăng Nhập
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            label=" Full Name "
-            name="username"
-            fullWidth
-            margin="normal"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
+     
           <TextField
             label="Email"
             name="email"

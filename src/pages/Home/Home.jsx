@@ -15,7 +15,8 @@ export default function Home() {
         }}
       />
       <Typography variant="h4" mt={4}>
-        Đây là trang chủ
+        Đây là trang chủ 
+        Tôi Phan thi loan  
       </Typography>
     </Box>
   );

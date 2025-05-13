@@ -1,5 +1,5 @@
 import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
-import { deepOrange, cyan, orange } from '@mui/material/colors';
+import { deepOrange,  orange } from '@mui/material/colors';
 
 const theme = extendTheme({
 
@@ -33,9 +33,9 @@ const theme = extendTheme({
     dark: {
       palette: {
         primary:{
-         main: '#44612d',      // 🌟 màu chính
+          main: '#1b2c53',      // 🌟 màu chính
           light: '#1A5EFF',
-          dark: '#152331',
+          dark: '#1b2c53',
         },
         secondary: orange,
         background: {

@@ -7,6 +7,7 @@ import {
   Paper
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -14,6 +15,12 @@ export default function Login() {
     email: "",
     password: "",
   });
+
+  const navigate = useNavigate();
+
+  const handleRegister = () =>{
+      navigate("/register")
+  }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -59,7 +66,18 @@ export default function Login() {
             type="submit"
             sx={{ mt: 2 }}
           >
-            Đăng ký
+            Đăng Nhập
+          </Button>
+
+             <Button
+            variant="contained"
+            fullWidth
+            type="submit"
+            sx={{ mt: 2 }}
+            onClick={handleRegister}
+            
+          >
+            Tạo tài khoản 
           </Button>
         </Box>
       </Paper>

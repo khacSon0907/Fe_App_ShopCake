@@ -6,13 +6,13 @@ export default function Logo() {
 
   return (
    <Typography
-      variant="h6"
+      variant="h5"
       sx={{ fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: 1 }}
       onClick={() => navigate("/")}
     >
       <img src={logo} alt="FE-Cake Logo" style={{ height: "80px" }} />
       
-      <Typography variant="h5"
+      <Typography fontSize={"large"}
         sx={{
                 fontWeight: "bold", cursor: "pointer",color:"White",paddingLeft:5,paddingRight:10
 

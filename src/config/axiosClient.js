@@ -1,31 +1,42 @@
-
 import axios from "axios";
 
+const API_BASE_URL="http://localhost:8080/api";
 const axiosClient = axios.create({
-  baseURL: "https://api.example.com", // ⚠️ Thay bằng URL thật của bạn
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
-});
-
-// Interceptor để xử lý trước request
+    baseURL:`${API_BASE_URL}`,
+    headers:{
+          "Content-Type": "application/json",
+    },
+      timeout: 15000,
+})
 axiosClient.interceptors.request.use(
   (config) => {
-    // Nếu cần thêm token:
-    // const token = localStorage.getItem("token");
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    const publicPaths = ["/auth/register", "/auth/login", "/auth/verify-otp"];
+    const isPublic = publicPaths.some((path) => config.url.includes(path));
+
+    if (!isPublic) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Interceptor để xử lý lỗi hoặc response chung
 axiosClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    console.error("API error:", error.response);
-    throw error;
+    const { response } = error;
+
+    if (response?.status === 401) {
+      console.warn("Bạn chưa đăng nhập hoặc token đã hết hạn.");
+      // Có thể redirect về trang login nếu cần
+    }
+
+    console.error("API Error:", response?.data || error.message);
+    return Promise.reject(error);
   }
 );
 

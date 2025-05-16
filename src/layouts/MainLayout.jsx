@@ -7,16 +7,19 @@ export default function MainLayout() {
   return (
     <Box
       sx={{
+        bgcolor: "background.paper", // nền trắng hoặc đen tùy chế độ
+        color: "text.primary",
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh", // 👈 Chiều cao toàn màn hình
       }}
     >
-      <Header />
-
-      <Box sx={{ flex: 1, px: 3, py: 2 }}>
+     
+      <Header/>
+      <Box sx={{mt:"70px", flex: 1, py: 2 }}>
         <Outlet />
       </Box>
+
       <Footer />
     </Box>
   );

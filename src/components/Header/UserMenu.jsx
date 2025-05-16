@@ -8,15 +8,15 @@ export default function UserMenu() {
   const navigate = useNavigate();
 
   // Giả định kiểm tra login qua localStorage token
-  const isLoggedIn = Boolean(localStorage.getItem("token"));
+  const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
 
   const handleOpen = (e) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
     handleClose();
-    navigate("/login");
+    navigate("/");
   };
 
   const handleLogin = () => {
@@ -29,9 +29,12 @@ export default function UserMenu() {
       <Button
         variant="outlined"
         color="inherit"
-        size="small"
+        size="large"
         onClick={handleLogin}
 
+        sx={{
+          fontWeight:700
+        }}
     
       >
         Đăng nhập

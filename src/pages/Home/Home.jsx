@@ -1,21 +1,12 @@
 import { Typography,Box } from "@mui/material";
-import logoPanner from "../../assets/logoPanner.png"
+import Banner from "../../components/Banner/Banner";
 export default function Home() {
   return (
     <Box>
-      <Box
-        component="img"
-        src={logoPanner}
-        alt="Banner Trang Chủ"
-        sx={{
-          width: "100%",
-          height: "auto",
-          maxHeight: "500px", // tuỳ chỉnh chiều cao tối đa
-          objectFit: "cover",
-        }}
-      />
+      <Banner/>
       <Typography variant="h4" mt={4}>
         Đây là trang chủ 
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa distinctio provident rerum tempora neque nesciunt! Expedita saepe consequuntur eaque, quo fugiat nesciunt, labore praesentium eum dolores rem ducimus maiores quis.
       </Typography>
     </Box>
   );

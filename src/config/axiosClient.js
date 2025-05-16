@@ -7,24 +7,20 @@ const axiosClient = axios.create({
           "Content-Type": "application/json",
     },
       timeout: 15000,
+       withCredentials: true
 })
+
+
 axiosClient.interceptors.request.use(
   (config) => {
-    const publicPaths = ["/auth/register", "/auth/login", "/auth/verify-otp"];
-    const isPublic = publicPaths.some((path) => config.url.includes(path));
-
-    if (!isPublic) {
-      const token = localStorage.getItem("token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
 );
-
 axiosClient.interceptors.response.use(
   (response) => response.data,
   (error) => {

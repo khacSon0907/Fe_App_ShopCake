@@ -4,42 +4,71 @@ import {
   Container,
   TextField,
   Typography,
-  Paper
+  Paper,
+  IconButton,
+  InputAdornment
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../services/userService";
+import { CircularProgress } from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
+import Swal from "sweetalert2";
 
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 export default function Login() {
+    const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
-    username: "",
     email: "",
     password: "",
   });
 
+  const toggleShowPassWord = () =>setShowPassword((prev)=> !prev);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = () =>{
-      navigate("/register")
-  }
+  const handleRegister = () => {
+    navigate("/register");
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Đăng ký thành công!");
-    console.log("Form:", form);
-  };
+    setLoading(true);
+    
 
+    try {
+      const res = await loginUser(form);
+      const accessToken = res?.data?.accessToken;
+
+      if (res.success && accessToken) {
+        localStorage.setItem("accessToken", accessToken);
+        navigate("/"); // hoặc redirect sang trang chính
+      }
+     else {
+             throw new Error(res.message || "Đăng nhập thất bại");
+      }
+    } catch (err) {
+       const msg = err?.response?.data?.message || err.message;
+        Swal.fire({
+          icon: "error",
+          title: "Đăng Nhập thất bại",
+          text: msg,
+        });
+    } finally {
+      setLoading(false); // Dù thành công hay thất bại đều tắt loading
+    }
+  };
   return (
     <Container maxWidth="sm">
       <Paper elevation={3} sx={{ padding: 4, mt: 8 }}>
         <Typography variant="h5" gutterBottom align="center">
-            Đăng Nhập
+          Đăng Nhập
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-     
           <TextField
             label="Email"
             name="email"
@@ -53,31 +82,59 @@ export default function Login() {
           <TextField
             label="Mật khẩu"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             fullWidth
             margin="normal"
             value={form.password}
             onChange={handleChange}
             required
+             InputProps={{
+           endAdornment: (
+          <InputAdornment position="end">
+            <IconButton onClick={toggleShowPassWord} edge="end">
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
           />
+
           <Button
             variant="contained"
             fullWidth
             type="submit"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, color: "text.primary" }}
+            disabled={loading}
           >
-            Đăng Nhập
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Đăng Nhập"
+            )}
           </Button>
 
-             <Button
+          <Button
             variant="contained"
             fullWidth
             type="submit"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, color: "text.primary" }}
             onClick={handleRegister}
-            
+            disabled={loading}
           >
-            Tạo tài khoản 
+            Tạo tài khoản
+          </Button>
+
+          <Button
+            variant="outlined"
+            fullWidth
+            sx={{ mt: 2, textTransform: "none" }}
+            startIcon={<GoogleIcon />}
+            onClick={() => {
+              // TODO: gọi hàm login với Google
+              alert("Chức năng đang phát triển");
+            }}
+          >
+            Đăng nhập với Google
           </Button>
         </Box>
       </Paper>

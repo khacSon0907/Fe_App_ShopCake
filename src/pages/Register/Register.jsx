@@ -5,14 +5,19 @@ import {
   TextField,
   Typography,
   Paper,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { useState } from "react";
 import { registerUser } from "../../services/userService";
 import { CircularProgress } from "@mui/material";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom"; // để chuyển trang
-
+import { useNavigate } from "react-router-dom";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 export default function Register() {
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassWord = () => setShowPassword((prev) => !prev);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -31,32 +36,43 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // bật loading
+    if (form.phoneNumber.length < 9) {
+      setLoading(false); // 👈 Thêm dòng này
+      return Swal.fire({
+        icon: "error",
+        title: "Đăng ký thất bại",
+        text: "Số điện thoại không hợp lệ",
+      });
+    }
 
     try {
-      const data = await registerUser(form);
-      console.log("data",data);
-      
-      Swal.fire({
-        icon: "success",
-        title: "Đăng ký thành công!",
-        text: "Chúng tôi đã gửi mã OTP đến email của bạn.",
-        confirmButtonText: "Nhập mã OTP",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate("/verify-otp");
-        }
-      });
+      const res = await registerUser(form);
+      const token = res?.data?.token;
+
+      if (res.success && token) {
+        localStorage.setItem("registerToken", token); // ✅ lưu token tạm
+        localStorage.setItem("registerEmail", form.email); // (optional) nếu cần dùng
+
+        Swal.fire({
+          icon: "success",
+          title: "Đăng ký thành công!",
+          text: "Chúng tôi đã gửi mã OTP đến email của bạn.",
+          confirmButtonText: "Nhập mã OTP",
+        }).then(() => {
+          navigate("/verify-otp"); // ✅ chuyển trang
+        });
+      } else {
+        throw new Error(res.message || "Đăng ký thất bại");
+      }
     } catch (err) {
       const msg = err?.response?.data?.message || err.message;
-      console.log("msg",msg);
-      alert("Lỗi: " + msg);
       Swal.fire({
         icon: "error",
-        title: "Lỗi đăng ký",
+        title: "Đăng ký thất bại",
         text: msg,
       });
     } finally {
-      setLoading(false); // tắt loading sau khi xong
+      setLoading(false); // tắt loading
     }
   };
 
@@ -89,12 +105,21 @@ export default function Register() {
           <TextField
             label="Mật khẩu"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             fullWidth
             margin="normal"
             value={form.password}
             onChange={handleChange}
             required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={toggleShowPassWord} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             label="Số điện thoại"

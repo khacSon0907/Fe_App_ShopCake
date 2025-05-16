@@ -16,16 +16,17 @@ export default function NavLinks() {
             component={NavLink}
             to={item.path}
             sx={{
+              color: "text.primary",
               textDecoration: "none",
-              color: "white",
               fontWeight: isActive ? 700 : 500,
-              borderBottom: isActive ? "2px solid white" : "none",
+              borderBottom: isActive ? "2px solid currentColor" : "none", // 👈 dùng currentColor
               paddingBottom: 1,
               letterSpacing: "1px",
-              fontSize: "14px",
-              transition: "all 0.1s ease-in-out",
+              fontSize: "16px",
+              transition: "all 0.15s ease-in-out",
               "&:hover": {
-                borderBottom: "2.5px solid white",
+                borderBottom: "2.5px solid currentColor", // 👈 dùng màu chữ hiện tại
+                opacity: 0.8,
               },
             }}
           >

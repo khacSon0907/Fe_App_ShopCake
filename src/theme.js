@@ -1,64 +1,59 @@
-import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
-import { deepOrange,  orange } from '@mui/material/colors';
+// src/theme.js
+import { experimental_extendTheme as extendTheme } from "@mui/material/styles";
+import { deepOrange, orange } from "@mui/material/colors";
 
 const theme = extendTheme({
-
- 
+    cssVarPrefix: "mui",
   colorSchemes: {
     light: {
       palette: {
-        primary:{
-          main: '#44612d',      // 🌟 màu chính
-          light: '#1A5EFF',
-          dark: '#e999a6',
+        mode: "light",
+        primary: {
+          main: "#44612d", // 🌿 Xanh chủ đạo
         },
         secondary: deepOrange,
         background: {
-          default: '#f9f9f9',
-          paper: '#ffffff',
+          default: "#f9f9f9",
+          paper: "#ffffff",
         },
         text: {
-          primary: '#121212',
-          secondary: '#333',
+          primary: "#121212",
+          secondary: "#4f4f4f",
         },
       },
-      typography: {
-        allVariants: {
-          color: '#121212',
-        },
-      },
-      shadows: [],
-        spacing: (factor) => `${0.25 * factor}rem`,
     },
     dark: {
       palette: {
-        primary:{
-          main: '#1b2c53',      // 🌟 màu chính
-          light: '#1A5EFF',
-          dark: '#1b2c53',
+        mode: "dark",
+        primary: {
+          main: "#44612d", // 🌿 Giữ branding xanh
         },
         secondary: orange,
         background: {
-          default: '#212121',
-          paper: '#1e1e1e',
+          default: "#121212",
+          paper: "#1e1e1e",
         },
         text: {
-          primary: '#ffffff',
-          secondary: '#ccc',
+          primary: "#ffffff",
+          secondary: "#aaaaaa",
         },
       },
-      typography: {
-        allVariants: {
-          color: '#ffffff',
-        },
-      },
-      shadows: [],  spacing: (factor) => `${0.25 * factor}rem`,
+    },
+  },
+
+  // Áp dụng style chung cho Typography
+  typography: {
+    fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
+    allVariants: {
+      // ✅ Đừng override color tại đây – đã có trong palette
     },
   },
 
   shape: {
     borderRadius: 12,
   },
+
+  spacing: (factor) => `${0.25 * factor}rem`,
 });
 
 export default theme;

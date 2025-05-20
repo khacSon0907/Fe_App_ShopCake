@@ -10,15 +10,47 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/userService";
+import { loginUser,loginWithGoogle } from "../../services/userService";
 import { CircularProgress } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import Swal from "sweetalert2";
-
+import { auth, provider } from "../../config/firebase";
+import { signInWithPopup } from "firebase/auth";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
 export default function Login() {
-    const [showPassword, setShowPassword] = useState(false);
+  
+  
+
+const handleLoginWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const idToken = await result.user.getIdToken();
+
+    const res = await loginWithGoogle(idToken);
+    const accessToken = res?.data?.accessToken || res?.accessToken;
+    console.log("res", res);
+    console.log("accessToken", accessToken);
+    
+
+    if (res.success && accessToken) {
+      localStorage.setItem("accessToken", accessToken);
+      navigate("/");
+    } else {
+      throw new Error(res.message || "Đăng nhập Google thất bại");
+    }
+  } catch (err) {
+    const msg = err?.response?.data?.message || err.message;
+    Swal.fire({
+      icon: "error",
+      title: "Đăng nhập Google thất bại",
+      text: msg,
+    });
+  }
+};
+
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -129,10 +161,7 @@ export default function Login() {
             fullWidth
             sx={{ mt: 2, textTransform: "none" }}
             startIcon={<GoogleIcon />}
-            onClick={() => {
-              // TODO: gọi hàm login với Google
-              alert("Chức năng đang phát triển");
-            }}
+            onClick={handleLoginWithGoogle}
           >
             Đăng nhập với Google
           </Button>

@@ -5,6 +5,7 @@ import Register from "../pages/Register/Register";
 import Login from "../pages/Login/Login";
 import Menu from "../pages/Menu/Menu";
 import OtpResgister from "../pages/Register/OtpResgister";
+import UserProfile from "../pages/UserProfile/UserProfile";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -15,7 +16,7 @@ export default function AppRoutes() {
           <Route path="/verify-otp" element={<OtpResgister/>}/>
           <Route path="/login" element={<Login/>} />
           <Route path="/menu" element={<Menu/>} />
-
+          <Route path="/profile" element={<UserProfile/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

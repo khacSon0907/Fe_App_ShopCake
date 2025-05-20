@@ -7,11 +7,14 @@ export default function UserMenu() {
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
-  // Giả định kiểm tra login qua localStorage token
   const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
 
   const handleOpen = (e) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
+
+  const handleProfile = ()=>{
+    navigate("/profile")
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -55,8 +58,10 @@ export default function UserMenu() {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <MenuItem onClick={handleClose}>Hồ sơ</MenuItem>
+        <MenuItem onClick={handleProfile}>Hồ sơ</MenuItem>
         <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+        <MenuItem onClick={handleLogout}>Đổi mật khẩu</MenuItem>
+
       </Menu>
     </>
   );

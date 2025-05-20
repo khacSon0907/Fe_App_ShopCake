@@ -25,7 +25,7 @@ export default function NavLinks() {
               fontSize: "16px",
               transition: "all 0.15s ease-in-out",
               "&:hover": {
-                borderBottom: "2.5px solid currentColor", // 👈 dùng màu chữ hiện tại
+                borderBottom: "2.1px solid currentColor", // 👈 dùng màu chữ hiện tại
                 opacity: 0.8,
               },
             }}

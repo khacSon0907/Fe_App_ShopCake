@@ -16,7 +16,7 @@ export default function NavLinks() {
             component={NavLink}
             to={item.path}
             sx={{
-              color: "text.primary",
+              color: "text.secondary",
               textDecoration: "none",
               fontWeight: isActive ? 700 : 500,
               borderBottom: isActive ? "2px solid currentColor" : "none", // 👈 dùng currentColor

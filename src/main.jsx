@@ -1,15 +1,18 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { CssBaseline } from '@mui/material';
-import {Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
-import theme from './theme';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import theme from "./theme";
 import AppRoutes from "./routes/AppRoutes";
+import { Provider } from "react-redux";
+import store from "./store/store";
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <CssVarsProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
-       <AppRoutes />
-    </CssVarsProvider>
+      <Provider store={store}>
+        <AppRoutes />
+      </Provider>
+    </ThemeProvider>
   </StrictMode>
 );

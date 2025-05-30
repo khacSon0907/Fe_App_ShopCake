@@ -9,11 +9,10 @@ export default function Logo() {
    <Typography
       variant="h5"
       sx={{ 
-        color:"text.primary",
+        color:"text.secondary",
         fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: 1 }}
       onClick={() => navigate("/")}
     >
-
          <BakeryDiningIcon sx={{ fontSize: 48 }} /> 
       <Typography fontWeight="bold" fontSize="large">
         CÁI LÒ NƯỚNG

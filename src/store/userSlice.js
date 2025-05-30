@@ -2,7 +2,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  currentUser: null,
+  data: null,
+  loading: false,
+  error: null,
+  token: localStorage.getItem("accessToken") || null,
 };
 
 const userSlice = createSlice({
@@ -10,13 +13,18 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action) {
-      state.currentUser = action.payload;
+      state.data = action.payload;
     },
+    setToken: (state, action) => {
+      state.token = action.payload;
+      localStorage.setItem("accessToken", action.payload);
+    },
+
     clearUser(state) {
-      state.currentUser = null;
+      state.data = null;
     },
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser,setToken } = userSlice.actions;
 export default userSlice.reducer;

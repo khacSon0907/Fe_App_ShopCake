@@ -1,6 +1,6 @@
 // src/components/Banner/Banner.jsx
 import { Box, Typography, Button } from "@mui/material";
-import panner from "../../assets/panner.jpg"
+import panner from "../../assets/panner.jpg";
 export default function Banner() {
   return (
     <Box
@@ -19,9 +19,20 @@ export default function Banner() {
         color: "white",
       }}
     >
-        <Button variant="contained" color="secondary" size="large">
-          Đặt ngay
-        </Button>
+      <Button
+        variant="contained"
+        size="large"
+        sx={{
+          marginTop:"90px",
+          backgroundColor: "#ff9800", // hoặc orange[500] nếu bạn import từ MUI
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "#fb8c00",
+          },
+        }}
+      >
+        Đặt ngay
+      </Button>
     </Box>
   );
 }

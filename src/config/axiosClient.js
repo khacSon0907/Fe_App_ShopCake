@@ -1,26 +1,32 @@
 import axios from "axios";
 
-const API_BASE_URL="http://localhost:8080/api";
-const axiosClient = axios.create({
-    baseURL:`${API_BASE_URL}`,  
-    headers:{
-          "Content-Type": "application/json",
-    },
-      timeout: 15000,
-       withCredentials: true
-})
+const API_BASE_URL = "http://localhost:8080/api";
 
+const axiosClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  withCredentials: true,
+});
 
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
+
+    // Các path KHÔNG cần gửi Authorization
+    const publicPaths = ["/auth/login", "/auth/google", "/auth/register", "/auth/verify-otp"];
+
+    const isPublic = publicPaths.some((path) => config.url.includes(path));
+
+    if (token && !isPublic) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    console.log("👉 Request headers:", config.headers);
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 axiosClient.interceptors.response.use(
   (response) => response.data,
   (error) => {

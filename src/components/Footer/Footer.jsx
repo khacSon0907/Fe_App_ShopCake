@@ -4,7 +4,7 @@ import logoFooter from "../../assets/logoFooter.png";
 
 export default function Footer() {
   return (
-  <Box sx={{ backgroundColor: "primary.main", color:"text.primary", pt: 4, pb: 2, mt: 8 }}>
+  <Box sx={{ backgroundColor: "primary.secondary", color:"text.secondary", pt: 4, pb: 2, mt: 8 }}>
       <Container maxWidth="lg">
         <Grid container spacing={4}>
           {/* Cột 1: Thông tin công ty */}

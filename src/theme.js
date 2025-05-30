@@ -1,52 +1,29 @@
 // src/theme.js
-import { experimental_extendTheme as extendTheme } from "@mui/material/styles";
-import { deepOrange, orange } from "@mui/material/colors";
+import { createTheme } from "@mui/material/styles";
 
-const theme = extendTheme({
-    cssVarPrefix: "mui",
-  colorSchemes: {
-    light: {
-      palette: {
-        mode: "light",
-        primary: {
-          main: "#44612d", // 🌿 Xanh chủ đạo
-        },
-        secondary: deepOrange,
-        background: {
-          default: "#f9f9f9",
-          paper: "#ffffff",
-        },
-        text: {
-          primary: "#121212",
-          secondary: "#4f4f4f",
-        },
-      },
+const theme = createTheme({
+  palette: {
+    mode: "light",
+    primary: {
+      main: "#44612d",
+      contrastText: "#ffffff",
+      secondary:"#152331"
     },
-    dark: {
-      palette: {
-        mode: "dark",
-        primary: {
-          main: "#44612d", // 🌿 Giữ branding xanh
-        },
-        secondary: orange,
-        background: {
-          default: "#121212",
-          paper: "#1e1e1e",
-        },
-        text: {
-          primary: "#ffffff",
-          secondary: "#aaaaaa",
-        },
-      },
+    secondary: {
+      main: "#152331",
+    },
+    background: {
+      default: "#f9f9f9",
+      paper: "#ffffff",
+    },
+    text: {
+      primary: "#000000",       // ✅ màu chữ chính là đen
+      secondary: "#fff",     // ✅ màu chữ phụ xám đậm
     },
   },
 
-  // Áp dụng style chung cho Typography
   typography: {
     fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
-    allVariants: {
-      // ✅ Đừng override color tại đây – đã có trong palette
-    },
   },
 
   shape: {
@@ -54,6 +31,31 @@ const theme = extendTheme({
   },
 
   spacing: (factor) => `${0.25 * factor}rem`,
+
+  components: {
+    MuiTextField: {
+      defaultProps: {
+        variant: "outlined",
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          color: "#444444", // text nhập vào
+        },
+        input: {
+          color: "#444444",
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: "#444444", // label
+        },
+      },
+    },
+  },
 });
 
 export default theme;

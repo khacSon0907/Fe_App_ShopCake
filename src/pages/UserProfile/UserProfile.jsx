@@ -5,9 +5,7 @@ import {
   Grid,
   IconButton,
   InputLabel,
-  MenuItem,
   Paper,
-  Select,
   TextField,
   Typography,
   Avatar,
@@ -18,9 +16,13 @@ import {
 import { PhotoCamera } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import axiosClient from "../../config/axiosClient";
 import { getCurrentUser, updateUser } from "../../services/userService";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/userSlice"; // 👈
+
 export default function UserProfile() {
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({
     fullname: "",
     phoneNumber: "",
@@ -30,25 +32,27 @@ export default function UserProfile() {
     address: "",
   });
 
+  const [initialData, setInitialData] = useState(null); // ⭐ dữ liệu gốc ban đầu
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await getCurrentUser();
-        console.log("res,", res.data);
-
-        setForm(res.data); // nếu BE trả về { data: { ...user } }
+        setInitialData(res.data); // ⭐ lưu lại bản gốc
+        setForm(res.data);
+        dispatch(setUser(res.data)); // 👈 cập nhật vào Redux luôn khi load
       } catch (error) {
         Swal.fire({
           icon: "error",
           title: "Lỗi khi tải thông tin user",
-          text: error,
+          text: error?.message || "Không thể tải dữ liệu người dùng",
         });
       }
     };
     fetchData();
-  }, []);
+  }, [dispatch]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -60,47 +64,27 @@ export default function UserProfile() {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setForm({ ...form, avatarUrl: reader.result }); // Preview ngay khi chọn ảnh
+      setForm({ ...form, avatarUrl: reader.result }); // Preview
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleAvatarUpload = async () => {
-    const blob = await fetch(form.avatarUrl).then((r) => r.blob());
-    const file = new File([blob], "avatar.jpg", { type: blob.type });
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await axiosClient.post("/upload/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return res.url;
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi upload ảnh",
-        text: error?.message,
-      });
-      return null;
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      let avatarUrl = form.avatarUrl;
+      let avatarFile = null;
 
-      if (avatarUrl.startsWith("data:")) {
-        const uploadedUrl = await handleAvatarUpload();
-        if (!uploadedUrl) return;
-        avatarUrl = uploadedUrl;
+      if (form.avatarUrl.startsWith("data:")) {
+        const blob = await fetch(form.avatarUrl).then((r) => r.blob());
+        avatarFile = new File([blob], "avatar.jpg", { type: blob.type });
       }
 
-      // Gửi cập nhật lên server
-      await updateUser({ ...form, avatarUrl });
+      const res = await updateUser({ ...form, avatarFile });
+
+      if (res && res.data) {
+        dispatch(setUser(res.data)); // ⭐ Cập nhật vào Redux khi cập nhật thành công
+      }
 
       Swal.fire({
         icon: "success",
@@ -116,6 +100,12 @@ export default function UserProfile() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (initialData) {
+      setForm(initialData);
     }
   };
 
@@ -242,6 +232,13 @@ export default function UserProfile() {
 
               <Grid item xs={12}>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Button
+                    variant="text"
+                    color="secondary"
+                    onClick={handleCancel}
+                  >
+                    Hủy
+                  </Button>
                   <Button variant="text" color="secondary">
                     Hủy
                   </Button>

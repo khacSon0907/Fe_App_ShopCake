@@ -1,25 +1,32 @@
 import { Avatar, IconButton, Menu, MenuItem, Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import noavatar from "../../assets/noavatar.jpg";
 
 export default function UserMenu() {
+  const user = useSelector((state) => state.user.data);
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate();
 
-  const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
+  const isLoggedIn = Boolean(localStorage.getItem("accessToken")) && user;
 
   const handleOpen = (e) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const handleProfile = ()=>{
-    navigate("/profile")
-  }
+  const handleProfile = () => {
+    navigate("/profile");
+    handleClose();
+  };
+  const handleChangePassWord = () => {
+    navigate("/change-password");
+    handleClose();
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    handleClose();
-    navigate("/");
+    window.location.reload(); // reload để Redux và layout làm sạch
   };
 
   const handleLogin = () => {
@@ -27,29 +34,26 @@ export default function UserMenu() {
   };
 
   if (!isLoggedIn) {
-    // 👉 Nếu chưa login, chỉ hiển thị nút Đăng nhập
     return (
       <Button
         variant="outlined"
         color="inherit"
         size="large"
         onClick={handleLogin}
-
-        sx={{
-          fontWeight:700
-        }}
-    
+        sx={{ fontWeight: 700 }}
       >
         Đăng nhập
       </Button>
     );
   }
 
-  // 👉 Nếu đã login, hiển thị Avatar + Menu
   return (
     <>
       <IconButton onClick={handleOpen}>
-        <Avatar sx={{ width: 32, height: 32 }}>U</Avatar>
+        <Avatar
+          src={user?.avatarUrl || noavatar}
+          sx={{ width: 32, height: 32, bgcolor: "primary.main" }}
+        />
       </IconButton>
       <Menu
         open={open}
@@ -59,9 +63,12 @@ export default function UserMenu() {
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <MenuItem onClick={handleProfile}>Hồ sơ</MenuItem>
-        <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
-        <MenuItem onClick={handleLogout}>Đổi mật khẩu</MenuItem>
 
+        {user?.authProvider !== "GOOGLE" && (
+          <MenuItem onClick={handleChangePassWord}>Đổi mật khẩu</MenuItem>
+        )}
+
+        <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
       </Menu>
     </>
   );

@@ -1,35 +1,45 @@
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import Logo from "./Logo";
-import ThemeSwitcher from "./ThemeSwitcher";
 import UserMenu from "./UserMenu";
 import NavLinks from "./NavLinks";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+
 export default function Header() {
   return (
     <Box
-   sx={{
-    position: "fixed",
-    top: 0,
-    height: "88px",
-    width: "100%",
-    backgroundColor: "primary.main",
-    display: "flex",
-    alignItems: "center",
-    px: 10,
-    justifyContent: "space-between",
-    zIndex: 1200, // Lớn hơn MarqueeBar
-    transition: "top 0.3s ease",
-  }}
+      sx={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "88px",
+        backgroundColor: "primary.main",
+        zIndex: 1200,
+        transition: "top 0.3s ease",
+        color:"text.secondary"
+      }}
     >
-      <Box sx={{display: "flex", alignItems: "center", gap: 6 }}>
-        <Logo />
-        <NavLinks />
-      </Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <ShoppingCartIcon fontSize="large"/>
-        <UserMenu />
-        <ThemeSwitcher />
-      </Box>
+      {/* ✅ Container giới hạn chiều ngang */}
+      <Container maxWidth="lg" sx={{ height: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Logo />
+            <NavLinks />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <ShoppingCartIcon fontSize="large" />
+            <UserMenu />
+          </Box>
+        </Box>
+      </Container>
     </Box>
   );
 }

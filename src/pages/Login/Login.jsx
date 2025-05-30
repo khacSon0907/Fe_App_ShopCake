@@ -6,11 +6,11 @@ import {
   Typography,
   Paper,
   IconButton,
-  InputAdornment
+  InputAdornment,
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser,loginWithGoogle } from "../../services/userService";
+import { loginUser, loginWithGoogle } from "../../services/userService";
 import { CircularProgress } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import Swal from "sweetalert2";
@@ -18,37 +18,51 @@ import { auth, provider } from "../../config/firebase";
 import { signInWithPopup } from "firebase/auth";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useDispatch } from "react-redux";
+import { setUser, setToken } from "../../store/userSlice";
+import { getCurrentUser } from "../../services/userService";
 
 export default function Login() {
-  
-  
+  const dispatch = useDispatch();
 
-const handleLoginWithGoogle = async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const idToken = await result.user.getIdToken();
+  const handleLoginWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      
+      const idToken = await result.user.getIdToken();
 
-    const res = await loginWithGoogle(idToken);
-    const accessToken = res?.data?.accessToken || res?.accessToken;
-    console.log("res", res);
-    console.log("accessToken", accessToken);
-    
 
-    if (res.success && accessToken) {
-      localStorage.setItem("accessToken", accessToken);
-      navigate("/");
-    } else {
-      throw new Error(res.message || "Đăng nhập Google thất bại");
+      const res = await loginWithGoogle(idToken);
+
+      console.log("res", res);
+      
+      const accessToken = res?.data?.accessToken || res?.accessToken;
+
+      if (res.success && accessToken) {
+        dispatch(setToken(accessToken));
+        const userRes = await getCurrentUser();
+        dispatch(setUser(userRes.data));
+        if (
+          userRes.data.role === "ADMIN") {  
+          navigate("/admin");
+        } else {
+          navigate("/"); // user bình thường
+        }
+      } else {
+        throw new Error(res.message || "Đăng nhập Google thất bại");
+      }
+    } catch (err) {
+
+      console.log("err", err);
+      
+      const msg = err?.response?.data?.message || err.message;
+      Swal.fire({
+        icon: "error",
+        title: "Đăng nhập Google thất bại",
+        text: msg,
+      });
     }
-  } catch (err) {
-    const msg = err?.response?.data?.message || err.message;
-    Swal.fire({
-      icon: "error",
-      title: "Đăng nhập Google thất bại",
-      text: msg,
-    });
-  }
-};
+  };
 
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
@@ -56,7 +70,7 @@ const handleLoginWithGoogle = async () => {
     password: "",
   });
 
-  const toggleShowPassWord = () =>setShowPassword((prev)=> !prev);
+  const toggleShowPassWord = () => setShowPassword((prev) => !prev);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -70,26 +84,31 @@ const handleLoginWithGoogle = async () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
 
     try {
       const res = await loginUser(form);
       const accessToken = res?.data?.accessToken;
 
       if (res.success && accessToken) {
-        localStorage.setItem("accessToken", accessToken);
-        navigate("/"); // hoặc redirect sang trang chính
-      }
-     else {
-             throw new Error(res.message || "Đăng nhập thất bại");
+        dispatch(setToken(accessToken));
+        const userRes = await getCurrentUser();
+        dispatch(setUser(userRes.data));
+         if (
+          userRes.data.role === "ADMIN") {
+          navigate("/admin");
+        } else {
+          navigate("/"); // user bình thường
+        }
+      } else {
+        throw new Error(res.message || "Đăng nhập thất bại");
       }
     } catch (err) {
-       const msg = err?.response?.data?.message || err.message;
-        Swal.fire({
-          icon: "error",
-          title: "Đăng Nhập thất bại",
-          text: msg,
-        });
+      const msg = err?.response?.data?.message || err.message;
+      Swal.fire({
+        icon: "error",
+        title: "Đăng Nhập thất bại",
+        text:msg
+      });
     } finally {
       setLoading(false); // Dù thành công hay thất bại đều tắt loading
     }
@@ -120,15 +139,15 @@ const handleLoginWithGoogle = async () => {
             value={form.password}
             onChange={handleChange}
             required
-             InputProps={{
-           endAdornment: (
-          <InputAdornment position="end">
-            <IconButton onClick={toggleShowPassWord} edge="end">
-              {showPassword ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </InputAdornment>
-        ),
-      }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={toggleShowPassWord} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           <Button

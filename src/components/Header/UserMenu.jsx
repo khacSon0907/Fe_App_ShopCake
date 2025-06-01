@@ -19,11 +19,21 @@ export default function UserMenu() {
     navigate("/profile");
     handleClose();
   };
+
   const handleChangePassWord = () => {
     navigate("/change-password");
     handleClose();
   };
 
+  const handleAdmin = () => {
+    navigate("/admin");
+    handleClose();
+  };
+
+  const handleHome = () => {
+    navigate("/");
+    handleClose();
+  };
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     window.location.reload(); // reload để Redux và layout làm sạch
@@ -66,6 +76,13 @@ export default function UserMenu() {
 
         {user?.authProvider !== "GOOGLE" && (
           <MenuItem onClick={handleChangePassWord}>Đổi mật khẩu</MenuItem>
+        )}
+
+        {user?.role === "ADMIN" && (
+          <MenuItem onClick={handleAdmin}>Quản trị</MenuItem>
+        )}
+        {user?.role === "ADMIN" && (
+          <MenuItem onClick={handleHome}>Home</MenuItem>
         )}
 
         <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>

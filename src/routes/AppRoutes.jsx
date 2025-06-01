@@ -11,25 +11,30 @@ import AdminLayout from "../layouts/AdminLayout";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "../services/userService";
-import { setUser } from "../store/userSlice";
+import { setUser ,setLoading,clearUser} from "../store/userSlice";
 import Dashboard from "../pages/admin/Dashboard";
 import UserManage from "../pages/admin/UserManage";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
+import CategoryManage from "../pages/admin/CategoryManage";
 export default function AppRoutes() {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      getCurrentUser()
-        .then((res) => {
-          dispatch(setUser(res.data));
-        })
-        .catch((err) => {
-          console.error("Không thể lấy thông tin người dùng:", err);
-        });
-    }
-  }, [dispatch]);
+ useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    dispatch(setLoading(true)); // ✅ bắt đầu loading
+    getCurrentUser()
+      .then((res) => {
+        dispatch(setUser(res.data));
+      })
+      .catch((err) => {
+        dispatch(clearUser()); // fallback
+        console.error("Không thể lấy thông tin người dùng:", err);
+      });
+  } else {
+    dispatch(setLoading(false)); // không có token cũng kết thúc loading
+  }
+}, [dispatch]);
 
   return (
     <BrowserRouter>
@@ -71,6 +76,8 @@ export default function AppRoutes() {
         >
           <Route index element={<Dashboard />} />
           <Route path="users" element={<UserManage />} />
+          <Route path="categories" element={<CategoryManage />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

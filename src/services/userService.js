@@ -66,3 +66,22 @@ return axiosClient.put("/users/update-user", formData, {
 export const changePassword = (data) => {
   return axiosClient.put("/users/change-password", data);
 };
+
+
+/// category tạo loại sản phầm 
+
+export const createCategory = (data) => {
+  return axiosClient.post("/categories/create" ,(data))
+}
+
+export const getAllCategories = () =>{
+  return axiosClient.get("/categories/getAll")
+}
+
+export const deleteCategory = (id) =>{
+  return axiosClient.delete(`/categories/delete/${id}`)
+}
+
+export const updateCategory = (data) => {
+  return axiosClient.put("/categories/update", data);
+}

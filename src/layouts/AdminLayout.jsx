@@ -1,9 +1,32 @@
 // src/layouts/AdminLayout.jsx
 import { Box } from "@mui/material";
 import AdminSidebar from "../components/admin/Sidebar";
-import { Outlet } from "react-router-dom";
 import AdminHeader from "../components/admin/AdminHeader";
+import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { getCurrentUser } from "../services/userService";
+import { setUser } from "../store/userSlice";
+
 export default function AdminLayout() {
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      getCurrentUser()
+        .then((res) => {
+          dispatch(setUser(res.data));
+          console.log("res", res);
+          
+        })
+        .catch((err) => {
+          console.error("Không thể lấy thông tin người dùng:", err);
+        });
+    }
+  }, [dispatch]);
+
   return (
     <Box sx={{ display: "flex" }}>
       <AdminSidebar />
@@ -11,7 +34,7 @@ export default function AdminLayout() {
         <AdminHeader />
         <Box
           sx={{
-            mt: "64px", // ✅ Chừa khoảng cho AppBar
+            mt: "64px",
             p: 3,
             minHeight: "100vh",
             bgcolor: "background.default",

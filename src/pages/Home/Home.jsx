@@ -1,5 +1,6 @@
 import { Typography, Box, Container } from "@mui/material";
 import Banner from "../../components/Banner/Banner";
+import Chatbox from "../../components/chatbox/chatbox";
 
 export default function Home() {
   return (
@@ -15,6 +16,8 @@ export default function Home() {
           dolores rem ducimus maiores quis.
         </Typography>
       </Container>
+
+      <Chatbox></Chatbox>
     </Box>
   );
 }

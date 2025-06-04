@@ -16,6 +16,7 @@ import Dashboard from "../pages/admin/Dashboard";
 import UserManage from "../pages/admin/UserManage";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
 import CategoryManage from "../pages/admin/CategoryManage";
+import ProductManage from "../pages/admin/ProductManage";
 export default function AppRoutes() {
   const dispatch = useDispatch();
 
@@ -77,6 +78,7 @@ export default function AppRoutes() {
           <Route index element={<Dashboard />} />
           <Route path="users" element={<UserManage />} />
           <Route path="categories" element={<CategoryManage />} />
+          <Route path="products" element={<ProductManage/>}/>
 
         </Route>
       </Routes>

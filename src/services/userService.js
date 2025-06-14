@@ -42,6 +42,31 @@ export const updateUserActive = (id, isActive) => {
 };
 
 
+
+
+export const changePassword = (data) => {
+  return axiosClient.put("/users/change-password", data);
+};
+
+
+
+export const createCategory = (data) => {
+  return axiosClient.post("/categories/create" ,(data))
+}
+
+export const getAllCategories = () =>{
+  return axiosClient.get("/categories/getAll")
+}
+
+export const deleteCategory = (id) =>{
+  return axiosClient.delete(`/categories/delete/${id}`)
+}
+
+export const updateCategory = (data) => {
+  return axiosClient.put("/categories/update", data);
+}
+
+
 export const updateUser = async (data) => {
   const formData = new FormData();
   formData.append("request", JSON.stringify({
@@ -63,25 +88,29 @@ return axiosClient.put("/users/update-user", formData, {
 });
 };
 
-export const changePassword = (data) => {
-  return axiosClient.put("/users/change-password", data);
+export const createProduct = (formData) => {
+  return axiosClient.post("/admin/products/create", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+};
+  export const getAllProducts=  () => {
+    return axiosClient.get("/admin/products");
+  }
+
+export const deleteProductById = (id) =>{
+  return axiosClient.delete(`/admin/products/${id}`)
+}
+
+export const updateProduct = (formData) => {
+  return axiosClient.put("/admin/products/update", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
 };
 
-
-/// category tạo loại sản phầm 
-
-export const createCategory = (data) => {
-  return axiosClient.post("/categories/create" ,(data))
-}
-
-export const getAllCategories = () =>{
-  return axiosClient.get("/categories/getAll")
-}
-
-export const deleteCategory = (id) =>{
-  return axiosClient.delete(`/categories/delete/${id}`)
-}
-
-export const updateCategory = (data) => {
-  return axiosClient.put("/categories/update", data);
+export const getProductUser = () =>{
+  return axiosClient.get("/products")
 }

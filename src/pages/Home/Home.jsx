@@ -1,6 +1,6 @@
 import { Typography, Box, Container } from "@mui/material";
 import Banner from "../../components/Banner/Banner";
-import Chatbox from "../../components/chatbox/chatbox";
+import Product from "../../components/Product/Product";
 
 export default function Home() {
   return (
@@ -9,15 +9,12 @@ export default function Home() {
 
       <Container maxWidth="lg">
 
-        <Typography color="text.primary" variant="h4" mt={4}>
-          Đây là trang chủ Lorem ipsum dolor sit amet consectetur adipisicing
-          elit. Ipsa distinctio provident rerum tempora neque nesciunt! Expedita
-          saepe consequuntur eaque, quo fugiat nesciunt, labore praesentium eum
-          dolores rem ducimus maiores quis.
-        </Typography>
+ 
+
+
+        <Product/>
       </Container>
 
-      <Chatbox></Chatbox>
     </Box>
   );
 }

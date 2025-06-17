@@ -17,6 +17,7 @@ import UserManage from "../pages/admin/UserManage";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
 import CategoryManage from "../pages/admin/CategoryManage";
 import ProductManage from "../pages/admin/ProductManage";
+import Cart from "../pages/cart/Cart";
 export default function AppRoutes() {
   const dispatch = useDispatch();
 
@@ -43,6 +44,7 @@ export default function AppRoutes() {
         {/* 🔹 Giao diện chính */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<Cart/>}/>
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<OtpResgister />} />
           <Route path="/login" element={<Login />} />

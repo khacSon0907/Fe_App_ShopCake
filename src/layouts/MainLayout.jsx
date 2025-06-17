@@ -18,7 +18,7 @@ export default function MainLayout() {
       }}
     >
       <Header />
-      <Box sx={{ mt: "70px", flex: 1, py: 2 }}>
+      <Box sx={{ mt: "80px", flex: 1, py: 2 }}>
         <Outlet />
       </Box>
       <Footer />

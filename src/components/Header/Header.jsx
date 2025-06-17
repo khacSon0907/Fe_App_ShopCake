@@ -3,8 +3,15 @@ import Logo from "./Logo";
 import UserMenu from "./UserMenu";
 import NavLinks from "./NavLinks";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
+  const navigate = useNavigate();
+
+  const handleCart = () => {
+    navigate("/cart");
+  };
+
   return (
     <Box
       sx={{
@@ -16,7 +23,7 @@ export default function Header() {
         backgroundColor: "primary.main",
         zIndex: 1200,
         transition: "top 0.3s ease",
-        color:"text.secondary"
+        color: "text.secondary",
       }}
     >
       {/* ✅ Container giới hạn chiều ngang */}
@@ -35,7 +42,20 @@ export default function Header() {
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <ShoppingCartIcon fontSize="large" />
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: 2,
+                cursor: "pointer",
+                "&:hover": {
+                  transform: "scale(1.1)",
+                },
+              }}
+              onClick={handleCart}
+            >
+              <ShoppingCartIcon fontSize="large" />
+            </Box>
+
             <UserMenu />
           </Box>
         </Box>

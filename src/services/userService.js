@@ -41,14 +41,9 @@ export const updateUserActive = (id, isActive) => {
   });
 };
 
-
-
-
 export const changePassword = (data) => {
   return axiosClient.put("/users/change-password", data);
 };
-
-
 
 export const createCategory = (data) => {
   return axiosClient.post("/categories/create" ,(data))
@@ -65,7 +60,6 @@ export const deleteCategory = (id) =>{
 export const updateCategory = (data) => {
   return axiosClient.put("/categories/update", data);
 }
-
 
 export const updateUser = async (data) => {
   const formData = new FormData();
@@ -113,4 +107,16 @@ export const updateProduct = (formData) => {
 
 export const getProductUser = () =>{
   return axiosClient.get("/products")
+}
+
+export const addTocart = (cartItem,userId) =>{
+  return axiosClient.post(`/cart/add/${userId}`,cartItem)
+}
+
+export const getCartUser = (userId) =>{
+    return axiosClient.get(`/cart/${userId}`)
+}
+
+export const getProductById = (id) =>{
+  return axiosClient.get(`/products/${id}`)
 }

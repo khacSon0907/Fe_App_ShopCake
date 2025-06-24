@@ -32,7 +32,7 @@ export default function UserProfile() {
     address: "",
   });
 
-  const [initialData, setInitialData] = useState(null); // ⭐ dữ liệu gốc ban đầu
+  const [initialData, setInitialData] = useState(null); //  liệu gốc ban đầu
 
   const [loading, setLoading] = useState(false);
 
@@ -40,7 +40,7 @@ export default function UserProfile() {
     const fetchData = async () => {
       try {
         const res = await getCurrentUser();
-        setInitialData(res.data); // ⭐ lưu lại bản gốc
+        setInitialData(res.data); // 
         setForm(res.data);
         dispatch(setUser(res.data)); // 👈 cập nhật vào Redux luôn khi load
       } catch (error) {

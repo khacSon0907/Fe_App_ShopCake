@@ -120,3 +120,7 @@ export const getCartUser = (userId) =>{
 export const getProductById = (id) =>{
   return axiosClient.get(`/products/${id}`)
 }
+
+export const deleteCartItem = (userId,productId)=>{
+  return axiosClient.delete(`/cart/${userId}/item/${productId}`)
+}

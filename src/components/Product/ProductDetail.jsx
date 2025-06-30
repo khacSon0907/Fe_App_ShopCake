@@ -19,6 +19,9 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
+  Snackbar,
+  AlertTitle,
+  Slide,
 } from "@mui/material";
 import {
   ShoppingCart,
@@ -32,15 +35,22 @@ import {
   CheckCircle,
   Error,
   Scale,
+  Close,
 } from "@mui/icons-material";
 
-import { getProductById } from "../../services/userService";
+import { getProductById ,addTocart} from "../../services/userService";
+import { useSelector } from "react-redux";
 
 const formatPrice = (price) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(price);
+
+// Component để hiển thị transition cho Snackbar
+function SlideTransition(props) {
+  return <Slide {...props} direction="up" />;
+}
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -53,6 +63,32 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // State cho notification system
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success", // success, error, warning, info
+  });
+
+  const userId = useSelector((state)=> state.user.data?.id)
+
+  // Function để hiển thị thông báo
+  const showNotification = (message, severity = "success") => {
+    setNotification({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  // Function để đóng thông báo
+  const handleCloseNotification = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setNotification(prev => ({ ...prev, open: false }));
+  };
 
   // Thêm effect để kiểm soát scroll behavior
   useEffect(() => {
@@ -113,19 +149,32 @@ export default function ProductDetail() {
     setQuantity(Math.max(1, Math.min(newQuantity, maxQuantity)));
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
     // Ngăn scroll khi click button
-    const cartItem = {
-      productId: product.id,
-      productName: product.name,
-      size: selectedSize,
-      quantity,
-      price: product.price,
-      image: product.images,
-      weight: product.weight,
-    };
-    console.log("Thêm vào giỏ hàng:", cartItem);
+  try {
+      const cartItem = {
+        productId: product.id,
+        name: product.name,
+        image: product.images,
+        price: product.price,
+        quantity:quantity,
+        selected: true,
+        discount: product.discount || 0,
+      };
+
+      const response = await addTocart(cartItem, userId);
+      if (response.success) {
+        console.log('✅ Đã thêm vào giỏ hàng:', product.name);
+        showNotification(`Đã thêm "${product.name}" vào giỏ hàng thành công! 🛒`, "success");
+      } else {
+        showNotification(`Thêm thất bại: ${response.data?.message || "Có lỗi xảy ra"}`, "error");
+      }
+    } catch (error) {
+      console.error('🔥 Lỗi khi gọi API addTocart:', error);
+      showNotification("Lỗi kết nối server. Vui lòng thử lại sau! 🚫", "error");
+    }
+  
   };
 
   const handleBuyNow = () => {
@@ -141,6 +190,7 @@ export default function ProductDetail() {
       total: product.price * quantity,
     };
     console.log("Mua ngay:", orderItem);
+    showNotification(`Đang chuyển đến trang thanh toán cho "${product.name}" 💳`, "info");
   };
 
   if (loading) {
@@ -564,6 +614,58 @@ export default function ProductDetail() {
           </Grid>
         </Grid>
       </Container>
+
+      {/* Notification System - Beautiful Snackbar positioned at bottom */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+        TransitionComponent={SlideTransition}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            minWidth: '300px',
+            maxWidth: '600px',
+          }
+        }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant="filled"
+          sx={{
+            width: '100%',
+            fontSize: '1rem',
+            fontWeight: 500,
+            borderRadius: 2,
+            boxShadow: 3,
+            '& .MuiAlert-icon': {
+              fontSize: '1.5rem',
+            },
+            '& .MuiAlert-action': {
+              paddingTop: 0,
+            }
+          }}
+          action={
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={handleCloseNotification}
+            >
+              <Close fontSize="small" />
+            </IconButton>
+          }
+        >
+          <AlertTitle sx={{ fontWeight: 'bold', mb: 0.5 }}>
+            {notification.severity === 'success' && '✅ Thành công'}
+            {notification.severity === 'error' && '❌ Có lỗi xảy ra'}
+            {notification.severity === 'warning' && '⚠️ Cảnh báo'}
+            {notification.severity === 'info' && 'ℹ️ Thông tin'}
+          </AlertTitle>
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

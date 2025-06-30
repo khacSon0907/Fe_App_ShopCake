@@ -1,7 +1,7 @@
 import { Typography, Box, Container } from "@mui/material";
 import Banner from "../../components/Banner/Banner";
 import Product from "../../components/Product/Product";
-import Chatbox from "../../components/chat/chatbox";
+import Chatbox from "../../components/BoxDify/Chatbox";
 export default function Home() {
   return (
     <Box>
@@ -9,9 +9,8 @@ export default function Home() {
 
          <Container maxWidth="lg">
 
-
-        <Product/>
         <Chatbox/>
+        <Product/>
       </Container>
 
     </Box>

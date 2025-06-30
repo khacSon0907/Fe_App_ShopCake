@@ -22,6 +22,8 @@ export default function MainLayout() {
         <Outlet />
       </Box>
       <Footer />
+
     </Box>
+
   );
 }

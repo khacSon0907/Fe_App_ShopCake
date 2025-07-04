@@ -117,10 +117,15 @@ export const getCartUser = (userId) =>{
     return axiosClient.get(`/cart/${userId}`)
 }
 
-export const getProductById = (id) =>{
+export const getProductById = (id) =>{  
   return axiosClient.get(`/products/${id}`)
 }
 
 export const deleteCartItem = (userId,productId)=>{
   return axiosClient.delete(`/cart/${userId}/item/${productId}`)
+}
+
+
+export const createOrder = (orders) =>{
+  return axiosClient.post("orders/create-order",orders)
 }

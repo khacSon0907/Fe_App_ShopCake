@@ -19,6 +19,7 @@ import CategoryManage from "../pages/admin/CategoryManage";
 import ProductManage from "../pages/admin/ProductManage";
 import Cart from "../pages/cart/Cart";
 import ProductDetail from "../components/Product/ProductDetail";
+import OrderManage from "../pages/admin/OrderManage";
 export default function AppRoutes() {
   const dispatch = useDispatch();
 
@@ -83,6 +84,7 @@ export default function AppRoutes() {
           <Route path="users" element={<UserManage />} />
           <Route path="categories" element={<CategoryManage />} />
           <Route path="products" element={<ProductManage/>}/>
+          <Route path="orders" element={<OrderManage/>}/>
 
         </Route>
       </Routes>

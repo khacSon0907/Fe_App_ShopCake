@@ -28,8 +28,10 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getCartUser, deleteCartItem } from '../../services/userService';
 import { useSelector } from 'react-redux';
+import Orders from '../Order/Orders';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -52,6 +54,10 @@ export default function Cart() {
     item: null
   });
   const [deletingItems, setDeletingItems] = useState(new Set()); // Track items being deleted
+  
+  // State mới để quản lý việc hiển thị Cart/Orders
+  const [showOrders, setShowOrders] = useState(false);
+  const [checkoutData, setCheckoutData] = useState(null);
 
   const fetchCartData = async () => {
     try {
@@ -63,20 +69,20 @@ export default function Cart() {
 
       const response = await getCartUser(user.id);
       console.log("cart data", response.data.items);
-const transformedItems =
-  response.data.items?.map((item, index) => ({
-    // Sử dụng unique key để tránh xung đột
-    uniqueId: `${item.productId}_${index}`, // Sử dụng productId thay vì id
-    productId: item.productId, // Đảm bảo có productId
-    name: item.name,
-    price: item.price,
-    quantity: item.quantity,
-    selected: item.selected || true,
-    image:
-      item.image ||
-      'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400',
-    discount: item.discount || 0,
-  })) || [];
+      const transformedItems =
+        response.data.items?.map((item, index) => ({
+          // Sử dụng unique key để tránh xung đột
+          uniqueId: `${item.productId}_${index}`, // Sử dụng productId thay vì id
+          productId: item.productId, // Đảm bảo có productId
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          selected: item.selected || true,
+          image:
+            item.image ||
+            'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400',
+          discount: item.discount || 0,
+        })) || [];
 
       setCartItems(transformedItems);
       setError(null);
@@ -148,25 +154,39 @@ const transformedItems =
 
   const selectedCount = getSelectedItems().length;
 
+  // Cập nhật function handleCheckout
   const handleCheckout = async () => {
     const selectedItems = getSelectedItems();
     if (selectedItems.length === 0) return;
 
     try {
       setUpdating(true);
-
-      const checkoutData = {
+      
+      console.log("Chuẩn bị chuyển sang trang thanh toán");
+      
+      const orderData = {
         items: selectedItems.map((item) => ({
           productId: item.productId || item.id,
+          name: item.name,
+          price: item.price,
           quantity: item.quantity,
-          price: item.price * (1 - item.discount / 100),
+          discount: item.discount,
+          finalPrice: item.price * (1 - item.discount / 100),
+          image: item.image,
         })),
         total: getTotal(),
         discount: getTotalDiscount(),
+        subtotal: getSubtotal() + getTotalDiscount(),
+        selectedCount: selectedCount,
+        userId: user.id,
       };
 
-      console.log('Proceeding to checkout with:', checkoutData);
-      // Example: navigate('/checkout', { state: { checkoutData } });
+      console.log('Dữ liệu đơn hàng:', orderData);
+      
+      // Lưu dữ liệu checkout và chuyển sang Orders
+      setCheckoutData(orderData);
+      setShowOrders(true);
+      
     } catch (err) {
       console.error('Error during checkout:', err);
       setError('Không thể tiến hành thanh toán. Vui lòng thử lại.');
@@ -175,15 +195,21 @@ const transformedItems =
     }
   };
 
+  // Function để quay lại Cart từ Orders
+  const handleBackToCart = () => {
+    setShowOrders(false);
+    setCheckoutData(null);
+    // Có thể refresh lại dữ liệu cart nếu cần
+    fetchCartData();
+  };
+
   // Hàm mở dialog xác nhận xóa
   const handleDeleteClick = (item) => {
     setDeleteDialog({
       open: true,
       item: item
     });
-    console.log(" test" , deleteDialog.item);
-    
-  
+    console.log("test", deleteDialog.item);
   };
 
   // Hàm đóng dialog
@@ -195,66 +221,55 @@ const transformedItems =
   };
 
   // Hàm xóa sản phẩm khỏi giỏ hàng
-const handleDeleteConfirm = async () => {
-  const itemToDelete = deleteDialog.item;
-  if (!itemToDelete) return;
-  
-  try {
-    // Thêm item vào danh sách đang xóa
-    setDeletingItems(prev => new Set([...prev, itemToDelete.uniqueId]));
+  const handleDeleteConfirm = async () => {
+    const itemToDelete = deleteDialog.item;
+    if (!itemToDelete) return;
     
-    console.log('Deleting item with:', {
-      userId: user.id,
-      productId: itemToDelete.productId,
-      itemData: itemToDelete
-    });
-    
-    // Gọi API với productId chính xác
-    const response = await deleteCartItem(user.id, itemToDelete.productId);
-    
-    console.log('Delete response:', response);
-    
-    // Nếu API thành công, cập nhật state local
-    setCartItems(prev => prev.filter(item => item.uniqueId !== itemToDelete.uniqueId));
-    
-    // Hiển thị thông báo thành công
-    setError(null);
-    console.log(`Đã xóa sản phẩm "${itemToDelete.name}" khỏi giỏ hàng`);
-    
-  } catch (err) {
-    console.error('Error deleting item:', err);
-    
-    // Log chi tiết lỗi để debug
-    console.error('Error details:', {
-      message: err.message,
-      response: err.response?.data,
-      status: err.response?.status
-    });
-    
-    setError(`Không thể xóa sản phẩm "${itemToDelete.name}". ${err.message || 'Vui lòng thử lại.'}`);
-  } finally {
-    // Xóa item khỏi danh sách đang xóa
-    setDeletingItems(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(itemToDelete.uniqueId);
-      return newSet;
-    });
-    
-    // Đóng dialog
-    handleDeleteClose();
-  }
-};
-
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Đang tải giỏ hàng...
-        </Typography>
-      </Container>
-    );
-  }
+    try {
+      // Thêm item vào danh sách đang xóa
+      setDeletingItems(prev => new Set([...prev, itemToDelete.uniqueId]));
+      
+      console.log('Deleting item with:', {
+        userId: user.id,
+        productId: itemToDelete.productId,
+        itemData: itemToDelete
+      });
+      
+      // Gọi API với productId chính xác
+      const response = await deleteCartItem(user.id, itemToDelete.productId);
+      
+      console.log('Delete response:', response);
+      
+      // Nếu API thành công, cập nhật state local
+      setCartItems(prev => prev.filter(item => item.uniqueId !== itemToDelete.uniqueId));
+      
+      // Hiển thị thông báo thành công
+      setError(null);
+      console.log(`Đã xóa sản phẩm "${itemToDelete.name}" khỏi giỏ hàng`);
+      
+    } catch (err) {
+      console.error('Error deleting item:', err);
+      
+      // Log chi tiết lỗi để debug
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      
+      setError(`Không thể xóa sản phẩm "${itemToDelete.name}". ${err.message || 'Vui lòng thử lại.'}`);
+    } finally {
+      // Xóa item khỏi danh sách đang xóa
+      setDeletingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemToDelete.uniqueId);
+        return newSet;
+      });
+      
+      // Đóng dialog
+      handleDeleteClose();
+    }
+  };
 
   const handleQuantityChange = async (uniqueId, newQuantity) => {
     // Validate input
@@ -281,7 +296,6 @@ const handleDeleteConfirm = async () => {
         )
       );
 
-
       console.log(`Updated quantity for item ${uniqueId} to ${quantity}`);
       
     } catch (err) {
@@ -295,6 +309,27 @@ const handleDeleteConfirm = async () => {
       setUpdating(false);
     }
   };
+
+  if (showOrders) {
+    return (
+      <Orders 
+        checkoutData={checkoutData} 
+        onBackToCart={handleBackToCart}
+        user={user}
+      />
+    );
+  }
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Đang tải giỏ hàng...
+        </Typography>
+      </Container>
+    );
+  }
   
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -362,7 +397,6 @@ const handleDeleteConfirm = async () => {
                 </Paper>
 
                 {cartItems.map((item, index) => (
-                  
                   <Slide key={item.uniqueId} direction="right" in timeout={500 + index * 200}>
                     <Card
                       sx={{
@@ -383,7 +417,6 @@ const handleDeleteConfirm = async () => {
                           checked={item.selected}
                           onChange={() => handleSelectItem(item.uniqueId)}
                           sx={{ color: 'black' }}
-                          // Thêm onClick để ngăn event bubbling
                           onClick={(e) => e.stopPropagation()}
                         />
                       </Box>
@@ -480,7 +513,6 @@ const handleDeleteConfirm = async () => {
                               },
                             }}
                             inputProps={{ min: 1 }}
-                            // Thêm onChange handler nếu cần
                             onChange={(e) => handleQuantityChange(item.uniqueId, e.target.value)}
                           />
                         </Box>

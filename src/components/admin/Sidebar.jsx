@@ -9,6 +9,7 @@ import {
   Divider,
   ListItemIcon,
   Paper,
+  Badge,
 } from "@mui/material";
 import {
   ExpandLess,
@@ -21,6 +22,16 @@ import {
   ShoppingCart,
   Cake,
   Store,
+  Receipt,
+  PendingActions,
+  LocalShipping,
+  CheckCircle,
+  Cancel,
+  Assignment,
+  TrendingUp,
+  Refresh,
+  AttachMoney,
+  AccessTime,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -72,9 +83,83 @@ const menuItems = [
   },
   { 
     label: "Quản lý đơn hàng", 
-    path: "/admin/orders",
     icon: <ShoppingCart />,
-    color: "#ab47bc"
+    color: "#ab47bc",
+    badge: 5, // Số đơn hàng mới
+    children: [
+      { 
+        label: "Tất cả đơn hàng", 
+        path: "/admin/orders", 
+        icon: <Receipt />,
+        color: "#ba68c8",
+        badge: 15 // Tổng số đơn hàng cần xử lý
+      },
+      { 
+        label: "Đơn hàng mới", 
+        path: "/admin/orders/pending", 
+        icon: <PendingActions />,
+        color: "#ff9800",
+        badge: 5 // Đơn hàng chờ xác nhận
+      },
+      { 
+        label: "Đang xử lý", 
+        path: "/admin/orders/processing", 
+        icon: <Refresh />,
+        color: "#2196f3",
+        badge: 3 // Đơn hàng đang chuẩn bị
+      },
+      { 
+        label: "Đang giao hàng", 
+        path: "/admin/orders/shipping", 
+        icon: <LocalShipping />,
+        color: "#03a9f4",
+        badge: 7 // Đơn hàng đang vận chuyển
+      },
+      { 
+        label: "Hoàn thành", 
+        path: "/admin/orders/completed", 
+        icon: <CheckCircle />,
+        color: "#4caf50"
+      },
+      { 
+        label: "Đã hủy", 
+        path: "/admin/orders/cancelled", 
+        icon: <Cancel />,
+        color: "#f44336"
+      },
+      { 
+        label: "Hoàn trả/Đổi hàng", 
+        path: "/admin/orders/returns", 
+        icon: <Assignment />,
+        color: "#ff5722",
+        badge: 2 // Yêu cầu hoàn trả
+      },
+    ],
+  },
+  {
+    label: "Báo cáo & Thống kê",
+    icon: <TrendingUp />,
+    color: "#e91e63",
+    children: [
+      { 
+        label: "Báo cáo doanh thu", 
+        path: "/admin/reports/revenue", 
+        icon: <AttachMoney />,
+        color: "#ec407a"
+      },
+      { 
+        label: "Thống kê đơn hàng", 
+        path: "/admin/reports/orders", 
+        icon: <Assignment />,
+        color: "#f06292"
+      },
+      { 
+        label: "Báo cáo theo thời gian", 
+        path: "/admin/reports/time", 
+        icon: <AccessTime />,
+        color: "#f48fb1"
+      },
+    ],
   },
 ];
 
@@ -95,12 +180,32 @@ export default function AdminSidebar() {
     return children?.some(child => location.pathname === child.path);
   };
 
+  const renderBadge = (count, color) => {
+    if (!count) return null;
+    return (
+      <Badge
+        badgeContent={count}
+        sx={{
+          '& .MuiBadge-badge': {
+            backgroundColor: color,
+            color: 'white',
+            fontSize: '0.7rem',
+            minWidth: '18px',
+            height: '18px',
+            borderRadius: '9px',
+            fontWeight: 'bold',
+            boxShadow: `0 2px 8px ${color}40`,
+          }
+        }}
+      />
+    );
+  };
+
   return (
     <Paper
-      
       elevation={3}
       sx={{
-        marginTop:"50px",
+        marginTop: "50px",
         marginRight: "30",
         width: 280,
         height: "100vh",
@@ -110,8 +215,22 @@ export default function AdminSidebar() {
         top: 0,
         left: 0,
         pt: 2,
-        overflow: "hidden",
+        overflow: "auto", // Changed to auto for scrolling
         zIndex: 1200,
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f1f1',
+          borderRadius: '10px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#c1c1c1',
+          borderRadius: '10px',
+          '&:hover': {
+            background: '#a8a8a8',
+          },
+        },
       }}
     >
       {/* Header */}
@@ -149,7 +268,7 @@ export default function AdminSidebar() {
       <Divider sx={{ mx: 2, mb: 2 }} />
 
       {/* Menu Items */}
-      <List sx={{ px: 2 }}>
+      <List sx={{ px: 2, pb: 10 }}> {/* Added padding bottom for footer */}
         {menuItems.map((item) => {
           if (item.children) {
             const isOpen = openMenus[item.label] || false;
@@ -187,11 +306,14 @@ export default function AdminSidebar() {
                       fontSize: '0.95rem',
                     }}
                   />
-                  {isOpen ? (
-                    <ExpandLess sx={{ color: item.color }} />
-                  ) : (
-                    <ExpandMore sx={{ color: 'text.secondary' }} />
-                  )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {item.badge && renderBadge(item.badge, item.color)}
+                    {isOpen ? (
+                      <ExpandLess sx={{ color: item.color }} />
+                    ) : (
+                      <ExpandMore sx={{ color: 'text.secondary' }} />
+                    )}
+                  </Box>
                 </ListItemButton>
                 
                 <Collapse in={isOpen} timeout="auto" unmountOnExit>
@@ -233,17 +355,20 @@ export default function AdminSidebar() {
                               color: subActive ? subItem.color : 'text.primary',
                             }}
                           />
-                          {subActive && (
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: '50%',
-                                bgcolor: subItem.color,
-                                boxShadow: `0 0 10px ${subItem.color}50`,
-                              }}
-                            />
-                          )}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {subItem.badge && renderBadge(subItem.badge, subItem.color)}
+                            {subActive && (
+                              <Box
+                                sx={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: '50%',
+                                  bgcolor: subItem.color,
+                                  boxShadow: `0 0 10px ${subItem.color}50`,
+                                }}
+                              />
+                            )}
+                          </Box>
                         </ListItemButton>
                       );
                     })}
@@ -286,17 +411,20 @@ export default function AdminSidebar() {
                   fontSize: '0.95rem',
                 }}
               />
-              {active && (
-                <Box
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    bgcolor: item.color,
-                    boxShadow: `0 0 15px ${item.color}60`,
-                  }}
-                />
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {item.badge && renderBadge(item.badge, item.color)}
+                {active && (
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: item.color,
+                      boxShadow: `0 0 15px ${item.color}60`,
+                    }}
+                  />
+                )}
+              </Box>
             </ListItemButton>
           );
         })}

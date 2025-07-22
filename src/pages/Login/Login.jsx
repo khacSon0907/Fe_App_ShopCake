@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser, loginWithGoogle } from "../../services/userService";
+import { loginUser, loginWithGoogle,getCurrentUser } from "../../services/userService";
 import { CircularProgress } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import Swal from "sweetalert2";
@@ -20,7 +20,6 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useDispatch } from "react-redux";
 import { setUser, setToken } from "../../store/userSlice";
-import { getCurrentUser } from "../../services/userService";
 
 export default function Login() {
   const dispatch = useDispatch();

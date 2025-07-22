@@ -83,7 +83,7 @@ export default function Header() {
           top: 0,
           left: 0,
           right: 0,
-          height: { xs: "72px", sm: "88px" },
+          height: { xs: "62px", sm: "88px" },
           background: scrolled 
             ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.95)} 0%, ${alpha(theme.palette.primary.dark, 0.95)} 100%)`
             : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,

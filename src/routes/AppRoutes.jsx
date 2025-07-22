@@ -20,6 +20,7 @@ import ProductManage from "../pages/admin/ProductManage";
 import Cart from "../pages/cart/Cart";
 import ProductDetail from "../components/Product/ProductDetail";
 import OrderManage from "../pages/admin/OrderManage";
+import Order from "../components/orders/Order";
 export default function AppRoutes() {
   const dispatch = useDispatch();
 
@@ -48,6 +49,7 @@ export default function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart/>}/>
+          <Route path="/order" element={<Order/>}/>
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<OtpResgister />} />
           <Route path="/login" element={<Login />} />

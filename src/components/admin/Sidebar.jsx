@@ -430,26 +430,6 @@ export default function AdminSidebar() {
         })}
       </List>
 
-      {/* Footer */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          p: 3,
-          background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
-          color: 'white',
-          textAlign: 'center',
-        }}
-      >
-        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-          © 2024 Sweet Bakery
-        </Typography>
-        <Typography variant="caption" sx={{ opacity: 0.7 }}>
-          Admin Dashboard v1.0
-        </Typography>
-      </Box>
     </Paper>
   );
 }

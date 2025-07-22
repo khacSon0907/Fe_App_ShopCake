@@ -12,7 +12,7 @@ axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
 
-    // Các path KHÔNG cần gửi Authorization
+  
     const publicPaths = ["/auth/login", "/auth/google", "/auth/register", "/auth/verify-otp"];
 
     const isPublic = publicPaths.some((path) => config.url.includes(path));

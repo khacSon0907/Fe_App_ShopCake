@@ -129,3 +129,8 @@ export const deleteCartItem = (userId,productId)=>{
 export const createOrder = (orders) =>{
   return axiosClient.post("orders/create-order",orders)
 }
+
+
+export const getOrderbyUserId = (userId) => {
+  return axiosClient.get(`orders/${userId}`)
+}

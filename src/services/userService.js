@@ -151,3 +151,11 @@ export const removeFromFavorite = (userId,productId) =>{
 export const getAllOrders = () => {
   return axiosClient.get("/admin/orders/all")
 }
+
+export const updateOrderStatus = (orderId, newStatus) => {
+  return axiosClient.put(`/admin/orders/${orderId}/update-status`, null, {
+    params: {
+      newStatus: newStatus,
+    },
+  });
+};

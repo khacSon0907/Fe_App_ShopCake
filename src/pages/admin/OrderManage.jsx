@@ -46,7 +46,7 @@ import {
   Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 
-import {getAllOrders} from '../../services/userService';
+import {getAllOrders,updateOrderStatus} from '../../services/userService';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -68,6 +68,7 @@ const formatDate = (dateString) => {
 const getStatusColor = (status) => {
   switch (status) {
     case 'PENDING':
+    case 'UNCONFIRMED':
       return 'warning';
     case 'CONFIRMED':
       return 'info';
@@ -87,6 +88,7 @@ const getStatusColor = (status) => {
 const getStatusText = (status) => {
   switch (status) {
     case 'PENDING':
+    case 'UNCONFIRMED':
       return 'Chờ xử lý';
     case 'CONFIRMED':
       return 'Đã xác nhận';
@@ -125,9 +127,22 @@ export default function OrderManage() {
         setError(null);
         const response = await getAllOrders();
         
+        console.log('API Response:', response); // Debug log
+        
+        // Check if response has data and it's an array
+        let ordersData = [];
+        if (response && response.data && Array.isArray(response.data)) {
+          ordersData = response.data;
+        } else if (response && Array.isArray(response)) {
+          ordersData = response;
+        } else {
+          console.warn('Unexpected API response structure:', response);
+          ordersData = [];
+        }
+        
         // Sort orders by creation date (newest first)
-        const sortedOrders = response.data.sort((a, b) => 
-          new Date(b.createdAt) - new Date(a.createdAt)
+        const sortedOrders = ordersData.sort((a, b) => 
+          new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
         );
         
         setOrders(sortedOrders);
@@ -149,10 +164,10 @@ export default function OrderManage() {
     
     if (searchTerm) {
       filtered = filtered.filter(order => 
-        order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.phoneNumber?.includes(searchTerm) ||
-        order.shippingAddress.toLowerCase().includes(searchTerm.toLowerCase())
+        order.shippingAddress?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
@@ -180,19 +195,31 @@ export default function OrderManage() {
     setEditDialogOpen(true);
   };
 
-  const handleUpdateStatus = (newStatus) => {
-    if (selectedOrder) {
-      const updatedOrders = orders.map(order => 
-        order._id === selectedOrder._id 
-          ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
-          : order
-      );
-      setOrders(updatedOrders);
-      setEditDialogOpen(false);
-      setSelectedOrder(null);
-      // TODO: Call API to update status
-    }
-  };
+ const handleUpdateStatus = async (newStatus) => {
+  if (!selectedOrder) return;
+
+  try {
+    setLoading(true);
+    await updateOrderStatus(selectedOrder.id, newStatus);
+
+    // Update local list of orders
+    const updatedOrders = orders.map(order =>
+      order.id === selectedOrder.id
+        ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
+        : order
+    );
+
+    setOrders(updatedOrders);
+    setEditDialogOpen(false);
+    setSelectedOrder(null);
+  } catch (err) {
+    console.error('Lỗi cập nhật trạng thái:', err);
+    alert('Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -243,7 +270,7 @@ export default function OrderManage() {
                   <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Box>
                       <Typography variant="h4" color="white" fontWeight="bold">
-                        {orders.filter(o => o.status === 'PENDING').length}
+                        {orders.filter(o => o.status === 'PENDING' || o.status === 'UNCONFIRMED').length}
                       </Typography>
                       <Typography variant="body2" color="white">
                         Chờ xử lý
@@ -342,6 +369,7 @@ export default function OrderManage() {
                     >
                       <MenuItem value="">Tất cả</MenuItem>
                       <MenuItem value="PENDING">Chờ xử lý</MenuItem>
+                      <MenuItem value="UNCONFIRMED">Chờ xử lý</MenuItem>
                       <MenuItem value="CONFIRMED">Đã xác nhận</MenuItem>
                       <MenuItem value="PROCESSING">Đang chuẩn bị</MenuItem>
                       <MenuItem value="SHIPPING">Đang giao</MenuItem>
@@ -402,75 +430,85 @@ export default function OrderManage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {filteredOrders.map((order) => (
-                      <TableRow key={order._id} hover>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="bold" color="primary">
-                            #{order._id.slice(-8)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box display="flex" alignItems="center">
-                            <PersonIcon sx={{ mr: 1, color: 'action.active' }} />
-                            <Box>
-                              <Typography variant="body2" fontWeight="bold">
-                                {order.customerName || 'N/A'}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                ID: {order.userId.slice(-6)}
-                              </Typography>
+                    {filteredOrders && filteredOrders.length > 0 ? (
+                      filteredOrders.map((order) => (
+                        <TableRow key={order.id} hover>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight="bold" color="primary">
+                              #{order.id?.slice(-8) || 'N/A'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Box display="flex" alignItems="center">
+                              <PersonIcon sx={{ mr: 1, color: 'action.active' }} />
+                              <Box>
+                                <Typography variant="body2" fontWeight="bold">
+                                  {order.customerName || 'Khách hàng'}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  ID: {order.userId?.slice(-6) || 'N/A'}
+                                </Typography>
+                              </Box>
                             </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell>{order.phoneNumber || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="bold" color="primary">
-                            {formatPrice(order.totalPrice)}
+                          </TableCell>
+                          <TableCell>{order.phoneNumber || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight="bold" color="primary">
+                              {formatPrice(order.totalPrice || 0)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={getStatusText(order.status)} 
+                              color={getStatusColor(order.status)}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={order.paymentMethod || 'N/A'} 
+                              variant="outlined"
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {order.createdAt ? formatDate(order.createdAt) : 'N/A'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Box display="flex" gap={1}>
+                              <Tooltip title="Xem chi tiết">
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => handleViewDetail(order)}
+                                  color="primary"
+                                >
+                                  <VisibilityIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Cập nhật trạng thái">
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => handleEditStatus(order)}
+                                  color="warning"
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} align="center">
+                          <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
+                            Không có đơn hàng nào
                           </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={getStatusText(order.status)} 
-                            color={getStatusColor(order.status)}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={order.paymentMethod} 
-                            variant="outlined"
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {formatDate(order.createdAt)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box display="flex" gap={1}>
-                            <Tooltip title="Xem chi tiết">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleViewDetail(order)}
-                                color="primary"
-                              >
-                                <VisibilityIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Cập nhật trạng thái">
-                              <IconButton 
-                                size="small" 
-                                onClick={() => handleEditStatus(order)}
-                                color="warning"
-                              >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -490,7 +528,7 @@ export default function OrderManage() {
           <Box display="flex" alignItems="center" gap={2}>
             <ReceiptIcon color="primary" />
             <Typography variant="h6">
-              Chi tiết đơn hàng #{selectedOrder?._id.slice(-8)}
+              Chi tiết đơn hàng #{selectedOrder?.id?.slice(-8)}
             </Typography>
           </Box>
         </DialogTitle>
@@ -649,11 +687,10 @@ export default function OrderManage() {
                 label="Trạng thái mới"
                 onChange={(e) => setSelectedOrder({...selectedOrder, status: e.target.value})}
               >
-                <MenuItem value="PENDING">Chờ xử lý</MenuItem>
+                <MenuItem value="UNCONFIRMED">Chưa xác nhận</MenuItem>
                 <MenuItem value="CONFIRMED">Đã xác nhận</MenuItem>
-                <MenuItem value="PROCESSING">Đang chuẩn bị</MenuItem>
                 <MenuItem value="SHIPPING">Đang giao</MenuItem>
-                <MenuItem value="DELIVERED">Đã giao</MenuItem>
+                <MenuItem value="COMPLETED">Đã giao</MenuItem>
                 <MenuItem value="CANCELLED">Đã hủy</MenuItem>
               </Select>
             </FormControl>

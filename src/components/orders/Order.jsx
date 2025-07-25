@@ -608,13 +608,13 @@ export default function Order() {
   return (
     <Box sx={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #7c93fbff 0%, #e0c0ffff 100%)',
       pb: 6
     }}>
       <Container maxWidth="lg" sx={{ py: 3 }}>
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" fontWeight={700} color="white" gutterBottom>
-            Đơn hàng của tôi
+            Đơn hàng của tôi  
           </Typography>
           <Typography variant="body1" color="rgba(255,255,255,0.9)">
             Theo dõi và quản lý tất cả đơn hàng của bạn

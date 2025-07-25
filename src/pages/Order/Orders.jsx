@@ -22,6 +22,7 @@ import {
   MenuItem,
   Snackbar,
   AlertTitle,
+  Grid,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -31,9 +32,10 @@ import {
   LocationOn as LocationOnIcon,
   ErrorOutline as ErrorIcon,
   Celebration as CelebrationIcon,
+  Phone as PhoneIcon,
 } from '@mui/icons-material';
 
-import { createOrder } from '../../services/userService';
+import { createOrder,updateUser } from '../../services/userService';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -43,9 +45,48 @@ const formatPrice = (price) => {
 };
 
 export default function Orders({ checkoutData, onBackToCart, user }) {
+
+  // ⏫ Thêm phía trên cùng file (sau các import)
+const sendDiscordNotification = async (orderData) => {
+  const { userId, phoneNumber, shippingAddress, items, total, paymentMethod } = orderData;
+
+  const content = `🎉 **ĐƠN HÀNG MỚI** 🎉
+👤 **User ID**: \`${userId}\`
+📞 **Số điện thoại**: ${phoneNumber}
+📍 **Địa chỉ giao hàng**: ${shippingAddress}
+💳 **Thanh toán**: ${paymentMethod}
+💰 **Tổng tiền**: ${formatPrice(total)}
+
+🧁 **Danh sách sản phẩm:**
+${items.map((item, index) => 
+  `  ${index + 1}. ${item.name} – SL: ${item.quantity} – Giá: ${formatPrice(item.price)}`
+).join('\n')}
+`;
+
+  try {
+    await fetch(
+      'https://discord.com/api/webhooks/1398180327779733606/sWMzMD95sVuGX4a-8ATTENzbe2YC5IHRgulWL3SqfNkEqdzifbWJ08So9ZsYZldIFtk5',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      }
+    );
+    console.log('✅ Gửi Discord webhook thành công.');
+  } catch (err) {
+    console.warn('❌ Gửi Discord webhook thất bại:', err);
+  }
+};
+
   const [error, setError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('COD');
-  const [shippingAddress, setShippingAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [shippingAddress, setShippingAddress] = useState({
+    street: '',
+    ward: '',
+    district: '',
+    city: ''
+  });
   const [createOrderLoading, setCreateOrderLoading] = useState(false);
   const [successDialog, setSuccessDialog] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -53,14 +94,96 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
+  const cityDistricts = {
+    "TP Hồ Chí Minh": {
+      "Quận 1": [
+        "Phường Bến Nghé", "Phường Bến Thành", "Phường Cầu Kho", "Phường Cầu Ông Lãnh",
+        "Phường Cô Giang", "Phường Đa Kao", "Phường Nguyễn Cư Trinh", "Phường Nguyễn Thái Bình",
+        "Phường Phạm Ngũ Lão", "Phường Tân Định"
+      ],
+      "Quận 3": [
+        "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6",
+        "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12",
+        "Phường 13", "Phường 14"
+      ],
+      "Quận 5": [
+        "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6",
+        "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12",
+        "Phường 13", "Phường 14", "Phường 15"
+      ],
+      "Quận 7": [
+        "Phường Bình Thuận", "Phường Phú Mỹ", "Phường Phú Thuận", "Phường Tân Hưng",
+        "Phường Tân Kiểng", "Phường Tân Phong", "Phường Tân Phú", "Phường Tân Quy"
+      ],
+      "Quận 10": [
+        "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6",
+        "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12",
+        "Phường 13", "Phường 14", "Phường 15"
+      ],
+      "Quận Tân Bình": [
+        "Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6",
+        "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12",
+        "Phường 13", "Phường 14", "Phường 15"
+      ],
+      "Quận Bình Thạnh": [
+        "Phường 1", "Phường 2", "Phường 3", "Phường 5", "Phường 6", "Phường 7",
+        "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 17",
+        "Phường 19", "Phường 21", "Phường 22", "Phường 24", "Phường 25", "Phường 26",
+        "Phường 27", "Phường 28"
+      ],
+      "Thành phố Thủ Đức": [
+        "Phường An Khánh", "Phường An Lợi Đông", "Phường An Phú", "Phường Bình Chiểu",
+        "Phường Bình Thọ", "Phường Bình Trưng Đông", "Phường Bình Trưng Tây",
+        "Phường Cát Lái", "Phường Hiệp Bình Chánh", "Phường Hiệp Bình Phước",
+        "Phường Linh Chiểu", "Phường Linh Đông", "Phường Linh Tây", "Phường Linh Trung",
+        "Phường Linh Xuân", "Phường Long Bình", "Phường Long Phước", "Phường Long Thạnh Mỹ",
+        "Phường Long Trường", "Phường Phú Hữu", "Phường Phước Bình", "Phường Phước Long A",
+        "Phường Phước Long B", "Phường Tam Bình", "Phường Tam Phú", "Phường Thạnh Mỹ Lợi",
+        "Phường Thảo Điền", "Phường Thủ Thiêm", "Phường Trường Thạnh", "Phường Trường Thọ"
+      ]
+    },
+    "Hà Nội": {
+      "Quận Ba Đình": [
+        "Phường Cống Vị", "Phường Điện Biên", "Phường Đội Cấn", "Phường Giảng Võ",
+        "Phường Kim Mã", "Phường Liễu Giai", "Phường Ngọc Hà", "Phường Ngọc Khánh",
+        "Phường Nguyễn Trung Trực", "Phường Phúc Xá", "Phường Quán Thánh", "Phường Thành Công",
+        "Phường Trúc Bạch", "Phường Vĩnh Phúc"
+      ],
+      "Quận Hoàn Kiếm": [
+        "Phường Chương Dương Độ", "Phường Cửa Đông", "Phường Cửa Nam", "Phường Đồng Xuân",
+        "Phường Hàng Bạc", "Phường Hàng Bài", "Phường Hàng Bồ", "Phường Hàng Bông",
+        "Phường Hàng Buồm", "Phường Hàng Đào", "Phường Hàng Gai", "Phường Hàng Mã",
+        "Phường Hàng Trống", "Phường Lý Thái Tổ", "Phường Phan Chu Trinh", "Phường Phúc Tân",
+        "Phường Tràng Tiền", "Phường Trần Hưng Đạo"
+      ]
+    }
+  };
+
+  const getDistrictsForCity = (city) => {
+    return cityDistricts[city] ? Object.keys(cityDistricts[city]) : [];
+  };
+
+  const getWardsForDistrict = (city, district) => {
+    return cityDistricts[city] && cityDistricts[city][district] 
+      ? cityDistricts[city][district] 
+      : [];
+  };
+
   console.log("user ", user);
   console.log(" order", orderSuccess);
   
-
   useEffect(() => {
-    // Set default shipping address if available
+    // Set default shipping address and phone if available
     if (user?.address) {
-      setShippingAddress(user.address);
+      setShippingAddress({
+        street: user.address.street || '',
+        ward: user.address.ward || '',
+        district: user.address.district || '',
+        city: user.address.city || ''
+      });
+    }
+    if (user?.phoneNumber) {
+      setPhoneNumber(user.phoneNumber);
     }
   }, [user]);
 
@@ -70,10 +193,85 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
     setSnackbarOpen(true);
   };
 
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Reset district and ward when city changes  
+    if (name === 'city') {
+      setShippingAddress({
+        ...shippingAddress,
+        city: value,
+        district: "",
+        ward: ""
+      });
+    }
+    // Reset ward when district changes
+    else if (name === 'district') {
+      setShippingAddress({
+        ...shippingAddress,
+        district: value,
+        ward: ""
+      });
+    }
+    else {
+      setShippingAddress({
+        ...shippingAddress,
+        [name]: value,
+      });
+    }
+  };
+
+  const formatAddressForAPI = () => {
+    const { street, ward, district, city } = shippingAddress;
+    const parts = [street, ward, district, city].filter(part => part.trim());
+    return parts.join(', ') || "123 Thảo Điền, Quận 2, TP.HCM";
+  };
+
+  const isAddressComplete = () => {
+    return shippingAddress.street.trim() && 
+           shippingAddress.ward.trim() && 
+           shippingAddress.district.trim() && 
+           shippingAddress.city.trim();
+  };
+
   const handleCreateOrder = async () => {
     try {
       setCreateOrderLoading(true);
       setError(null);
+      
+      // Check if user info has changed and update if needed
+      const hasAddressChanged = 
+        user?.address?.street !== shippingAddress.street ||
+        user?.address?.ward !== shippingAddress.ward ||
+        user?.address?.district !== shippingAddress.district ||
+        user?.address?.city !== shippingAddress.city;
+      
+      const hasPhoneChanged = user?.phoneNumber !== phoneNumber;
+      
+      // Update user profile if info has changed
+      if (hasAddressChanged || hasPhoneChanged) {
+        try {
+          const updatedUserData = {
+            ...user,
+            phoneNumber: phoneNumber,
+            address: {
+              street: shippingAddress.street,
+              ward: shippingAddress.ward,
+              district: shippingAddress.district,
+              city: shippingAddress.city
+            }
+          };
+          
+          console.log('Updating user profile with:', updatedUserData);
+          const res = await updateUser(updatedUserData);
+          console.log(" update user ", res);
+          
+          console.log('User profile updated successfully');
+        } catch (updateErr) {
+          console.warn('Failed to update user profile:', updateErr);
+          // Continue with order creation even if profile update fails
+        }
+      }
       
       // Prepare order data theo format API
       const orderData = {
@@ -86,8 +284,9 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
           discount: item.discount || 0
         })),
         discount: checkoutData.discount || 0,
-        shippingAddress: shippingAddress || "123 Thảo Điền, Quận 2, TP.HCM",
-        paymentMethod: paymentMethod
+        shippingAddress: formatAddressForAPI(),
+        paymentMethod: paymentMethod,
+        phoneNumber: phoneNumber
       };
       
       console.log('Creating order with data:', orderData);
@@ -96,6 +295,9 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
       const response = await createOrder(orderData);
       
       console.log('Order created successfully:', response);
+      
+      const discord = await sendDiscordNotification({ ...orderData, total: checkoutData.total });
+      console.log(" discord ", discord);
       
       // Hiển thị dialog thành công
       setOrderSuccess(true);
@@ -259,6 +461,31 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
             </CardContent>
           </Card>
 
+          {/* Thông tin liên hệ */}
+          <Card sx={{ mb: 3, boxShadow: 2 }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                <PhoneIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Thông tin liên hệ
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              
+              <TextField
+                fullWidth
+                label="Số điện thoại"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Nhập số điện thoại liên hệ..."
+                disabled={createOrderLoading}
+                variant="outlined"
+                required
+                InputProps={{
+                  startAdornment: <PhoneIcon sx={{ mr: 1, color: 'action.active' }} />
+                }}
+              />
+            </CardContent>
+          </Card>
+
           {/* Địa chỉ giao hàng */}
           <Card sx={{ mb: 3, boxShadow: 2 }}>
             <CardContent>
@@ -268,17 +495,79 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
               </Typography>
               <Divider sx={{ mb: 2 }} />
               
-              <TextField
-                fullWidth
-                label="Địa chỉ giao hàng"
-                multiline
-                rows={2}
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                placeholder="Nhập địa chỉ giao hàng chi tiết..."
-                disabled={createOrderLoading}
-                variant="outlined"
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Số nhà, tên đường"
+                    name="street"
+                    value={shippingAddress.street}
+                    onChange={handleAddressChange}
+                    placeholder="Ví dụ: 123 Nguyễn Huệ"
+                    disabled={createOrderLoading}
+                    variant="outlined"
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth variant="outlined" required>
+                    <InputLabel>Thành phố</InputLabel>
+                    <Select
+                      name="city"
+                      value={shippingAddress.city}
+                      onChange={handleAddressChange}
+                      label="Thành phố"
+                      disabled={createOrderLoading}
+                    >
+                      <MenuItem value="">-- Chọn thành phố --</MenuItem>
+                      {Object.keys(cityDistricts).map((city) => (
+                        <MenuItem key={city} value={city}>
+                          {city}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth variant="outlined" disabled={!shippingAddress.city || createOrderLoading} required>
+                    <InputLabel>Quận/Huyện</InputLabel>
+                    <Select
+                      name="district"
+                      value={shippingAddress.district}
+                      onChange={handleAddressChange}
+                      label="Quận/Huyện"
+                    >
+                      <MenuItem value="">-- Chọn quận/huyện --</MenuItem>
+                      {getDistrictsForCity(shippingAddress.city).map((district) => (
+                        <MenuItem key={district} value={district}>
+                          {district}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControl fullWidth variant="outlined" disabled={!shippingAddress.district || createOrderLoading} required>
+                    <InputLabel>Phường/Xã</InputLabel>
+                    <Select
+                      name="ward"
+                      value={shippingAddress.ward}
+                      onChange={handleAddressChange}
+                      label="Phường/Xã"
+                    >
+                      <MenuItem value="">-- Chọn phường/xã --</MenuItem>
+                      {getWardsForDistrict(shippingAddress.city, shippingAddress.district).map((ward) => (
+                        <MenuItem key={ward} value={ward}>
+                          {ward}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
             </CardContent>
           </Card>
 
@@ -322,7 +611,7 @@ export default function Orders({ checkoutData, onBackToCart, user }) {
               variant="contained"
               size="large"
               onClick={handleCreateOrder}
-              disabled={createOrderLoading || !shippingAddress.trim()}
+              disabled={createOrderLoading || !isAddressComplete() || !phoneNumber.trim()}
               sx={{
                 px: 4,
                 py: 2,

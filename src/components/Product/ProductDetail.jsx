@@ -429,13 +429,7 @@ export default function ProductDetail() {
                       </Typography>
                     </Grid>
                   )}
-                  {product.stock !== undefined && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body2">
-                        <strong>Tồn kho:</strong> {product.stock} sản phẩm
-                      </Typography>
-                    </Grid>
-                  )}
+               
                 </Grid>
               </Paper>
 

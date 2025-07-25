@@ -134,3 +134,20 @@ export const createOrder = (orders) =>{
 export const getOrderbyUserId = (userId) => {
   return axiosClient.get(`orders/${userId}`)
 }
+
+export const getFavoritesByUserId = (userId) => {
+  return axiosClient.get(`/favorites/${userId}`)
+}
+
+
+export const addToFavorite = (userId,data) => {
+  return axiosClient.post(`/favorites/${userId}`,data)
+}
+
+export const removeFromFavorite = (userId,productId) =>{
+  return axiosClient.delete(`/favorites/${userId}/${productId}`)
+}
+
+export const getAllOrders = () => {
+  return axiosClient.get("/admin/orders/all")
+}

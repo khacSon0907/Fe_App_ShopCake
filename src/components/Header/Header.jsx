@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
 import UserMenu from "./UserMenu";
 import NavLinks from "./NavLinks";
+import { useSelector } from "react-redux";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -39,8 +40,10 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [cartItems] = useState(10); // Mock cart items count
-  const [favoriteItems] = useState(2); // Mock favorite items count
 
+  const favoriteItems = useSelector((state) => state.favorite);
+  console.log("log", favoriteItems);
+  
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -165,7 +168,7 @@ export default function Header() {
                   }}
                 >
                   <Badge 
-                    badgeContent={favoriteItems} 
+                    badgeContent={favoriteItems.length}
                     color="error"
                     sx={{
                       '& .MuiBadge-badge': {

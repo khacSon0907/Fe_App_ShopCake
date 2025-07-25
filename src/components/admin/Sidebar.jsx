@@ -85,35 +85,30 @@ const menuItems = [
     label: "Quản lý đơn hàng", 
     icon: <ShoppingCart />,
     color: "#ab47bc",
-    badge: 5, // Số đơn hàng mới
     children: [
       { 
         label: "Tất cả đơn hàng", 
         path: "/admin/orders", 
         icon: <Receipt />,
         color: "#ba68c8",
-        badge: 15 // Tổng số đơn hàng cần xử lý
       },
       { 
         label: "Đơn hàng mới", 
         path: "/admin/orders/pending", 
         icon: <PendingActions />,
         color: "#ff9800",
-        badge: 5 // Đơn hàng chờ xác nhận
       },
       { 
         label: "Đang xử lý", 
         path: "/admin/orders/processing", 
         icon: <Refresh />,
         color: "#2196f3",
-        badge: 3 // Đơn hàng đang chuẩn bị
       },
       { 
         label: "Đang giao hàng", 
         path: "/admin/orders/shipping", 
         icon: <LocalShipping />,
         color: "#03a9f4",
-        badge: 7 // Đơn hàng đang vận chuyển
       },
       { 
         label: "Hoàn thành", 
@@ -127,13 +122,7 @@ const menuItems = [
         icon: <Cancel />,
         color: "#f44336"
       },
-      { 
-        label: "Hoàn trả/Đổi hàng", 
-        path: "/admin/orders/returns", 
-        icon: <Assignment />,
-        color: "#ff5722",
-        badge: 2 // Yêu cầu hoàn trả
-      },
+  
     ],
   },
   {

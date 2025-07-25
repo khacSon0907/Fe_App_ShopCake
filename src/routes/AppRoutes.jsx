@@ -21,6 +21,9 @@ import Cart from "../pages/cart/Cart";
 import ProductDetail from "../components/Product/ProductDetail";
 import OrderManage from "../pages/admin/OrderManage";
 import Order from "../components/orders/Order";
+import MemberContact from '../pages/Home/MemberContac'
+import FavoriteUser from "../pages/Favorite/FavoriteUser";
+import { ToastContainer } from 'react-toastify';
 export default function AppRoutes() {
   const dispatch = useDispatch();
 
@@ -54,6 +57,9 @@ export default function AppRoutes() {
           <Route path="/verify-otp" element={<OtpResgister />} />
           <Route path="/login" element={<Login />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/loyalty"element= {<MemberContact/>}/>
+          <Route path="/favorites"element= {<FavoriteUser/>}/>
+
           <Route
             path="/change-password"
             element={
@@ -90,6 +96,9 @@ export default function AppRoutes() {
 
         </Route>
       </Routes>
+     <ToastContainer position="top-right" autoClose={3000} />
+
     </BrowserRouter>
+
   );
 }

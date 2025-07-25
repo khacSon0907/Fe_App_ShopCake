@@ -53,6 +53,7 @@ export default function UserMenu() {
     navigate("/");
     handleClose();
   };
+  
   const handleOrder = () => {
     navigate("/order");
     handleClose();
@@ -94,8 +95,119 @@ export default function UserMenu() {
     );
   }
 
+  // Tạo danh sách menu items để tránh Fragment
+  const menuItems = [
+    // User Info Header
+    <Box key="user-info" sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box>
+          {user?.role === "ADMIN" && (
+            <Chip 
+              label="Admin" 
+              size="small" 
+              color="primary" 
+              variant="outlined"
+              sx={{ height: 20, fontSize: '0.75rem' }}
+            />
+          )}
+        </Box>
+      </Box>
+    </Box>,
+
+    // Profile Menu Item
+    <MenuItem 
+      key="profile"
+      onClick={handleProfile}
+      sx={{ 
+        py: 1.5,
+        '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+      }}
+    >
+      <PersonIcon sx={{ mr: 2, color: '#1976d2' }} />
+      Hồ sơ
+    </MenuItem>
+  ];
+
+  // Conditionally add change password menu item
+  if (user?.authProvider !== "GOOGLE") {
+    menuItems.push(
+      <MenuItem 
+        key="change-password"
+        onClick={handleChangePassWord}
+        sx={{ 
+          py: 1.5,
+          '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+        }}
+      >
+        <LockIcon sx={{ mr: 2, color: '#ff9800' }} />
+        Đổi mật khẩu
+      </MenuItem>
+    );
+  }
+
+  // Add order menu item
+  menuItems.push(
+    <MenuItem 
+      key="order"
+      sx={{ 
+        py: 1.5,
+        '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+      }}
+      onClick={handleOrder}
+    >
+      <OrderIcon sx={{ mr: 2, color: '#4caf50' }} />
+      Đơn hàng
+    </MenuItem>
+  );
+
+  // Add admin menu items if user is admin
+  if (user?.role === "ADMIN") {
+    menuItems.push(
+      <Divider key="admin-divider" sx={{ my: 1 }} />,
+      <MenuItem 
+        key="admin"
+        onClick={handleAdmin}
+        sx={{ 
+          py: 1.5,
+          '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+        }}
+      >
+        <AdminIcon sx={{ mr: 2, color: '#9c27b0' }} />
+        Quản trị
+      </MenuItem>,
+      <MenuItem 
+        key="home"
+        onClick={handleHome}
+        sx={{ 
+          py: 1.5,
+          '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+        }}
+      >
+        <HomeIcon sx={{ mr: 2, color: '#2196f3' }} />
+        Home
+      </MenuItem>
+    );
+  }
+
+  // Add logout menu item
+  menuItems.push(
+    <Divider key="logout-divider" sx={{ my: 1 }} />,
+    <MenuItem 
+      key="logout"
+      onClick={handleLogout}
+      sx={{ 
+        py: 1.5,
+        color: 'error.main',
+        '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.04)' }
+      }}
+    >
+      <LogoutIcon sx={{ mr: 2, color: '#f44336' }} />
+      Đăng xuất
+    </MenuItem>
+  );
+
   return (
-    <>
+    <Box>
       <IconButton 
         onClick={handleOpen}
         sx={{
@@ -138,100 +250,8 @@ export default function UserMenu() {
           }
         }}
       >
-        {/* User Info Header */}
-        <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-           
-            <Box>
-            
-              {user?.role === "ADMIN" && (
-                <Chip 
-                  label="Admin" 
-                  size="small" 
-                  color="primary" 
-                  variant="outlined"
-                  sx={{ height: 20, fontSize: '0.75rem' }}
-                />
-              )}
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Menu Items */}
-        <MenuItem 
-          onClick={handleProfile}
-          sx={{ 
-            py: 1.5,
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-          }}
-        >
-          <PersonIcon sx={{ mr: 2, color: '#1976d2' }} />
-          Hồ sơ
-        </MenuItem>
-
-        {user?.authProvider !== "GOOGLE" && (
-          <MenuItem 
-            onClick={handleChangePassWord}
-            sx={{ 
-              py: 1.5,
-              '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-            }}
-          >
-            <LockIcon sx={{ mr: 2, color: '#ff9800' }} />
-            Đổi mật khẩu
-          </MenuItem>
-        )}
-
-        <MenuItem 
-          sx={{ 
-            py: 1.5,
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-          }}
-         onClick={handleOrder}
-         >
-          <OrderIcon sx={{ mr: 2, color: '#4caf50' }} />
-          Đơn hàng
-        </MenuItem>
-
-        {user?.role === "ADMIN" && (
-          <>
-            <Divider sx={{ my: 1 }} />
-            <MenuItem 
-              onClick={handleAdmin}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-              }}
-            >
-              <AdminIcon sx={{ mr: 2, color: '#9c27b0' }} />
-              Quản trị
-            </MenuItem>
-            <MenuItem 
-              onClick={handleHome}
-              sx={{ 
-                py: 1.5,
-                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-              }}
-            >
-              <HomeIcon sx={{ mr: 2, color: '#2196f3' }} />
-              Home
-            </MenuItem>
-          </>
-        )}
-
-        <Divider sx={{ my: 1 }} />
-        <MenuItem 
-          onClick={handleLogout}
-          sx={{ 
-            py: 1.5,
-            color: 'error.main',
-            '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.04)' }
-          }}
-        >
-          <LogoutIcon sx={{ mr: 2, color: '#f44336' }} />
-          Đăng xuất
-        </MenuItem>
+        {menuItems}
       </Menu>
-    </>
+    </Box>
   );
 }

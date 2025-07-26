@@ -39,24 +39,26 @@ import {
   ExpandLess,
   Star,
   Inventory,
-  LocalOffer
+  LocalOffer,
+  HelpOutline,
+  Done
 } from '@mui/icons-material';
-import { getOrderbyUserId } from '../../services/userService';
+import { getOrderbyUserId, cancelOrder } from '../../services/userService';
 import { useSelector } from 'react-redux';
 
 const statusConfig = {
-  PENDING: { 
+  UNCONFIRMED: { 
     color: 'warning', 
-    icon: <Schedule fontSize="small" />, 
-    label: 'Chờ xử lý',
+    icon: <HelpOutline fontSize="small" />, 
+    label: 'Chưa xác nhận',
     bgColor: 'linear-gradient(135deg, #FFF8E1 0%, #FFF3C4 100%)',
     borderColor: '#FFB300',
     chipBg: '#FF8F00'
   },
-  PROCESSING: { 
+  CONFIRMED: { 
     color: 'info', 
-    icon: <CircularProgress size={14} />, 
-    label: 'Đang xử lý',
+    icon: <Done fontSize="small" />, 
+    label: 'Đã xác nhận',
     bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
     borderColor: '#2196F3',
     chipBg: '#1976D2'
@@ -69,10 +71,10 @@ const statusConfig = {
     borderColor: '#4CAF50',
     chipBg: '#388E3C'
   },
-  DELIVERED: { 
+  COMPLETED: { 
     color: 'success', 
     icon: <CheckCircle fontSize="small" />, 
-    label: 'Đã giao hàng',
+    label: 'Hoàn tất',
     bgColor: 'linear-gradient(135deg, #E8F5E8 0%, #A5D6A7 100%)',
     borderColor: '#4CAF50',
     chipBg: '#2E7D32'
@@ -231,8 +233,9 @@ function OrderDetailsTable({ items }) {
   );
 }
 
-function OrderCard({ order }) {
+function OrderCard({ order, onOrderUpdate }) {
   const [expanded, setExpanded] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const status = statusConfig[order.status] || {};
   const paymentMethod = paymentMethodConfig[order.paymentMethod] || {};
 
@@ -255,6 +258,30 @@ function OrderCard({ order }) {
 
   const calculateSubtotal = () => {
     return (order.items || []).reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      await cancelOrder(order.id);
+      
+      // Hiển thị thông báo thành công
+      alert('Hủy đơn hàng thành công!');
+      
+      // Gọi callback để refresh danh sách orders
+      if (onOrderUpdate) {
+        onOrderUpdate();
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại!');
+    } finally {
+      setCancelling(false);
+    }
   };
 
   return (
@@ -434,7 +461,7 @@ function OrderCard({ order }) {
           >
             Chi tiết
           </Button>
-          {order.status === 'DELIVERED' && (
+          {order.status === 'COMPLETED' && (
             <Button
               variant="contained"
               size="small"
@@ -446,16 +473,21 @@ function OrderCard({ order }) {
               Đánh giá
             </Button>
           )}
-          {order.status === 'PENDING' && (
+          {order.status === 'UNCONFIRMED' && (
             <Button
               variant="contained"
               size="small"
-              startIcon={<Cancel fontSize="small" />}
+              startIcon={cancelling ? <CircularProgress size={14} color="inherit" /> : <Cancel fontSize="small" />}
+              disabled={cancelling}
+              onClick={handleCancelOrder}
               sx={{
-                background: 'linear-gradient(135deg, #F44336 0%, #D32F2F 100%)'
+                background: 'linear-gradient(135deg, #F44336 0%, #D32F2F 100%)',
+                '&:disabled': {
+                  background: '#ccc'
+                }
               }}
             >
-              Hủy đơn
+              {cancelling ? 'Đang hủy...' : 'Hủy đơn'}
             </Button>
           )}
         </Box>
@@ -522,10 +554,10 @@ function OrderCard({ order }) {
                     <strong>Địa chỉ:</strong> {order.shippingAddress}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Người nhận:</strong> {order.recipientName || 'Chưa cập nhật'}
+                    <strong>Người nhận:</strong> {order.userName || 'Chưa cập nhật'}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Số điện thoại:</strong> {order.recipientPhone || 'Chưa cập nhật'}
+                    <strong>Số điện thoại:</strong> {order.userPhone || 'Chưa cập nhật'}
                   </Typography>
                 </Paper>
               </Grid>
@@ -599,9 +631,10 @@ export default function Order() {
 
   const filterOptions = [
     { value: 'ALL', label: 'Tất cả', count: orders.length, color: '#9C27B0' },
-    { value: 'PENDING', label: 'Chờ xử lý', count: orders.filter(o => o.status === 'PENDING').length, color: '#FF9800' },
-    { value: 'SHIPPING', label: 'Đang giao', count: orders.filter(o => o.status === 'SHIPPING').length, color: '#2196F3' },
-    { value: 'DELIVERED', label: 'Đã giao', count: orders.filter(o => o.status === 'DELIVERED').length, color: '#4CAF50' },
+    { value: 'UNCONFIRMED', label: 'Chưa xác nhận', count: orders.filter(o => o.status === 'UNCONFIRMED').length, color: '#FF9800' },
+    { value: 'CONFIRMED', label: 'Đã xác nhận', count: orders.filter(o => o.status === 'CONFIRMED').length, color: '#2196F3' },
+    { value: 'SHIPPING', label: 'Đang giao', count: orders.filter(o => o.status === 'SHIPPING').length, color: '#4CAF50' },
+    { value: 'COMPLETED', label: 'Hoàn tất', count: orders.filter(o => o.status === 'COMPLETED').length, color: '#4CAF50' },
     { value: 'CANCELLED', label: 'Đã hủy', count: orders.filter(o => o.status === 'CANCELLED').length, color: '#F44336' }
   ];
 
@@ -673,7 +706,11 @@ export default function Order() {
             {filteredOrders.length > 0 ? (
               <Box>
                 {filteredOrders.map(order => (
-                  <OrderCard key={order.id} order={order} />
+                  <OrderCard 
+                    key={order.id} 
+                    order={order} 
+                    onOrderUpdate={fetchOrders}
+                  />
                 ))}
               </Box>
             ) : (

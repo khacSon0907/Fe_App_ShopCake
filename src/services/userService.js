@@ -159,3 +159,6 @@ export const updateOrderStatus = (orderId, newStatus) => {
     },
   });
 };
+export const cancelOrder = (orderId) => {
+  return axiosClient.put(`/orders/${orderId}/cancel`)
+}

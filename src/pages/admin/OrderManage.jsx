@@ -368,12 +368,10 @@ export default function OrderManage() {
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
                       <MenuItem value="">Tất cả</MenuItem>
-                      <MenuItem value="PENDING">Chờ xử lý</MenuItem>
-                      <MenuItem value="UNCONFIRMED">Chờ xử lý</MenuItem>
+                      <MenuItem value="UNCONFIRMED">Chờ xác nhận</MenuItem>
                       <MenuItem value="CONFIRMED">Đã xác nhận</MenuItem>
-                      <MenuItem value="PROCESSING">Đang chuẩn bị</MenuItem>
                       <MenuItem value="SHIPPING">Đang giao</MenuItem>
-                      <MenuItem value="DELIVERED">Đã giao</MenuItem>
+                      <MenuItem value="COMPLETED">Đã Giao</MenuItem>
                       <MenuItem value="CANCELLED">Đã hủy</MenuItem>
                     </Select>
                   </FormControl>
@@ -443,7 +441,7 @@ export default function OrderManage() {
                               <PersonIcon sx={{ mr: 1, color: 'action.active' }} />
                               <Box>
                                 <Typography variant="body2" fontWeight="bold">
-                                  {order.customerName || 'Khách hàng'}
+                                  {order.userName || 'Khách hàng'}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
                                   ID: {order.userId?.slice(-6) || 'N/A'}
@@ -451,7 +449,7 @@ export default function OrderManage() {
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell>{order.phoneNumber || 'N/A'}</TableCell>
+                          <TableCell>{order.userPhone || 'N/A'}</TableCell>
                           <TableCell>
                             <Typography variant="body2" fontWeight="bold" color="primary">
                               {formatPrice(order.totalPrice || 0)}
@@ -544,15 +542,15 @@ export default function OrderManage() {
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">Tên:</Typography>
-                      <Typography variant="body1">{selectedOrder.customerName || 'N/A'}</Typography>
+                      <Typography variant="body2" color="text.primary">Tên: </Typography>
+                      <Typography variant="body1">{selectedOrder.userName || 'N/A'}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">SĐT:</Typography>
-                      <Typography variant="body1">{selectedOrder.phoneNumber || 'N/A'}</Typography>
+                      <Typography variant="body2" color="text.primary">SĐT:</Typography>
+                      <Typography variant="body1">{selectedOrder.userPhone || 'N/A'}</Typography>
                     </Grid>
                     <Grid item xs={12}>
-                      <Typography variant="body2" color="text.secondary">Địa chỉ giao hàng:</Typography>
+                      <Typography variant="body2" color="text.primary">Địa chỉ giao hàng:</Typography>
                       <Typography variant="body1">{selectedOrder.shippingAddress}</Typography>
                     </Grid>
                   </Grid>

@@ -20,6 +20,10 @@ import {
   AlertTitle,
   Slide,
   CircularProgress,
+  TextField,
+  InputAdornment,
+  Paper,
+  Chip,
 } from "@mui/material";
 import {
   ShoppingCart,
@@ -27,6 +31,8 @@ import {
   Close,
   FavoriteBorder,
   Favorite,
+  Search,
+  Clear,
 } from "@mui/icons-material";
 import {
   getProductUser,
@@ -126,7 +132,7 @@ const ErrorAlert = ({ open, onClose, message }) => (
 const ProductCard = ({ product, onShowAlert, onShowError }) => {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorite.favorites);
-  const userId = useSelector((state) => state.  user.data?.id);
+  const userId = useSelector((state) => state.user.data?.id);
   const navigate = useNavigate();
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -262,6 +268,7 @@ export default function Product() {
   const [errorAlertOpen, setErrorAlertOpen] = useState(false);
   const [alertData, setAlertData] = useState({ productName: "", productImage: "" });
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
 
   const handleShowAlert = (productName, productImage) => {
@@ -273,6 +280,16 @@ export default function Product() {
     setErrorMessage(message);
     setErrorAlertOpen(true);
   };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
+
+  // Lọc sản phẩm theo từ khóa tìm kiếm
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -304,6 +321,112 @@ export default function Product() {
         Sản phẩm mới
       </Typography>
 
+      {/* Search Bar */}
+      <Paper
+        elevation={3}
+        sx={{
+          mb: 4,
+          p: 1,
+          borderRadius: 3,
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        }}
+      >
+        <TextField
+          fullWidth
+          placeholder="Tìm kiếm sản phẩm theo tên..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 3,
+              backgroundColor: "white",
+              "& fieldset": {
+                border: "2px solid transparent",
+              },
+              "&:hover fieldset": {
+                border: "2px solid #1976d2",
+              },
+              "&.Mui-focused fieldset": {
+                border: "2px solid #1976d2",
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: "#666" }} />
+              </InputAdornment>
+            ),
+            endAdornment: searchTerm && (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClearSearch}
+                  size="small"
+                  sx={{
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#d32f2f",
+                    },
+                  }}
+                >
+                  <Clear fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Paper>
+
+      {/* Search Results Info */}
+      {searchTerm && (
+        <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography variant="body1" color="text.secondary">
+            Kết quả tìm kiếm cho:
+          </Typography>
+          <Chip
+            label={`"${searchTerm}"`}
+            color="primary"
+            variant="outlined"
+            onDelete={handleClearSearch}
+            sx={{ fontWeight: 600 }}
+          />
+          <Typography variant="body2" color="text.secondary">
+            ({filteredProducts.length} sản phẩm)
+          </Typography>
+        </Box>
+      )}
+
+      {/* No Results Message */}
+      {searchTerm && filteredProducts.length === 0 && !loading && (
+        <Paper
+          elevation={2}
+          sx={{
+            p: 4,
+            textAlign: "center",
+            borderRadius: 3,
+            backgroundColor: "#f9f9f9",
+            mb: 4,
+          }}
+        >
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Không tìm thấy sản phẩm nào
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Không có sản phẩm nào phù hợp với từ khóa "{searchTerm}"
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={handleClearSearch}
+            startIcon={<Clear />}
+            sx={{ borderRadius: 2 }}
+          >
+            Xóa bộ lọc
+          </Button>
+        </Paper>
+      )}
+
       <Grid container spacing={4}>
         {loading
           ? [...Array(4)].map((_, i) => (
@@ -313,7 +436,7 @@ export default function Product() {
                 <Skeleton height={20} width="80%" />
               </Grid>
             ))
-          : products.map((product) => (
+          : filteredProducts.map((product) => (
               <Grid item xs={12} sm={6} md={3} key={product.id}>
                 <Fade in timeout={500}>
                   <Box height="100%">

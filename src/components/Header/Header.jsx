@@ -63,9 +63,6 @@ export default function Header() {
     navigate("/favorites");
   };
 
-  const handleSearch = () => {
-    navigate("/search");
-  };
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -134,23 +131,7 @@ export default function Header() {
             {/* Right Section - Actions & User Menu */}
             <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
               {/* Search Button */}
-              <Tooltip title="Tìm kiếm" arrow>
-                <IconButton
-                  onClick={handleSearch}
-                  sx={{
-                    color: alpha(theme.palette.common.white, 0.9),
-                    '&:hover': {
-                      color: 'white',
-                      backgroundColor: alpha(theme.palette.common.white, 0.1),
-                      transform: 'translateY(-2px) scale(1.05)',
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    borderRadius: '12px',
-                  }}
-                >
-                  <SearchIcon />
-                </IconButton>
-              </Tooltip>
+            
 
               {/* Favorites Button */}
               <Tooltip title="Yêu thích" arrow>

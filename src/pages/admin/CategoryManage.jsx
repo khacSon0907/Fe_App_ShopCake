@@ -81,57 +81,78 @@ export default function CategoryManage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (isEditing) {
-        const updateData = {
-          code: form.code,
-          name: form.name,
-          description: form.description
-        };
+  const isDuplicate = () => {
+    return categories.some((cat) => {
+      if (isEditing && cat.code === originalCode) return false;
+      return (
+        cat.code.trim().toLowerCase() === form.code.trim().toLowerCase() ||
+        cat.name.trim().toLowerCase() === form.name.trim().toLowerCase()
+      );
+    });
+  };
 
-        console.log("update data:", updateData);
-        console.log("original code:", originalCode);
-        
-        const resUpdate = await updateCategory(updateData);
-        console.log("resUpdate", resUpdate);
-        
-        Swal.fire({
-          title: "Thành công!",
-          text: "Cập nhật danh mục thành công!",
-          icon: "success",
-          confirmButtonColor: "#ff6b35"
-        });
-      } else {
-        const createData = {
-          code: form.code,
-          name: form.name,
-          description: form.description
-        };
-        
-        console.log("create data:", createData);
-        
-        await createCategory(createData);
-        Swal.fire({
-          title: "Thành công!",
-          text: "Thêm danh mục thành công!",
-          icon: "success",
-          confirmButtonColor: "#ff6b35"
-        });
-      }
-      
-      fetchData();
-      handleCloseDialog();
-    } catch (err) {
-      console.error("Error:", err);
+  const handleSubmit = async () => {
+  if (!form.code.trim() || !form.name.trim() || !form.description.trim()) {
+    Swal.fire({
+      title: "Lỗi!",
+      text: "Vui lòng nhập đầy đủ mã, tên và mô tả danh mục.",
+      icon: "warning",
+      confirmButtonColor: "#ff6b35"
+    });
+    return;
+  }
+
+  if (isDuplicate()) {
+    Swal.fire({
+      title: "Lỗi!",
+      text: "Mã hoặc tên danh mục đã tồn tại.",
+      icon: "warning",
+      confirmButtonColor: "#ff6b35"
+    });
+    return;
+  }
+
+  try {
+    if (isEditing) {
+      const updateData = {
+        code: form.code,
+        name: form.name,
+        description: form.description
+      };
+      await updateCategory(updateData);
       Swal.fire({
-        title: "Lỗi!",
-        text: err?.response?.data?.message || "Đã có lỗi xảy ra",
-        icon: "error",
+        title: "Thành công!",
+        text: "Cập nhật danh mục thành công!",
+        icon: "success",
+        confirmButtonColor: "#ff6b35"
+      });
+    } else {
+      const createData = {
+        code: form.code,
+        name: form.name,
+        description: form.description
+      };
+      await createCategory(createData);
+      Swal.fire({
+        title: "Thành công!",
+        text: "Thêm danh mục thành công!",
+        icon: "success",
         confirmButtonColor: "#ff6b35"
       });
     }
-  };
+
+    fetchData();
+    handleCloseDialog();
+  } catch (err) {
+    console.error("Error:", err);
+    Swal.fire({
+      title: "Lỗi!",
+      text: err?.response?.data?.message || "Đã có lỗi xảy ra",
+      icon: "error",
+      confirmButtonColor: "#ff6b35"
+    });
+  }
+};
 
   const handleDelete = async (code) => {
     const confirm = await Swal.fire({
@@ -147,9 +168,7 @@ export default function CategoryManage() {
 
     if (confirm.isConfirmed) {
       try {
-        const resss = await deleteCategory(code);
-        console.log("delete result:", resss);
-        
+        await deleteCategory(code);
         fetchData();
         Swal.fire({
           title: "Đã xóa!",

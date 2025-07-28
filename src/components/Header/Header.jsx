@@ -39,7 +39,6 @@ export default function Header() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [cartItems] = useState(10); // Mock cart items count
 
   const favoriteItems = useSelector((state) => state.favorite);
   console.log("log", favoriteItems);
@@ -195,7 +194,6 @@ export default function Header() {
                     }}
                   >
                     <Badge 
-                      badgeContent={cartItems} 
                       color="warning"
                       sx={{
                         '& .MuiBadge-badge': {
